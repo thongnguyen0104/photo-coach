@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* Bảng màu: trung tính ấm + điểm nhấn màu "giờ vàng" */
+:root {
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --surface-2: #f3f1ed;
+  --border: #e5e1da;
+  --text: #1c1917;
+  --muted: #6b645c;
+  --accent: #d97706;
+  --accent-fg: #ffffff;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --info: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12110f;
+    --surface: #1c1a17;
+    --surface-2: #262420;
+    --border: #36322c;
+    --text: #f5f3ef;
+    --muted: #a8a096;
+    --accent: #f59e0b;
+    --accent-fg: #1c1917;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --info: #60a5fa;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-info: var(--info);
+  --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Thẻ nội dung dùng chung */
+@utility card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: opacity 150ms, background-color 150ms;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+@utility btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  &:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+}

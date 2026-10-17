@@ -1,0 +1,32 @@
+# dependencies
+/node_modules
+tools/*/node_modules
+
+# next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Dữ liệu chạy local (DB PGlite, ảnh upload ở chế độ local)
+/.data/
+
+# testing
+/coverage
+/test-results/
+/playwright-report/
+
+# Bí mật — KHÔNG bao giờ commit
+.env
+.env*.local
+!.env.example
+*.pem
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+Thumbs.db
+npm-debug.log*

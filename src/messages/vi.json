@@ -1,0 +1,252 @@
+{
+  "app": {
+    "name": "Photo Coach",
+    "tagline": "Huấn luyện viên chụp ảnh AI",
+    "description": "Tải ảnh lên, AI chỉ ra điểm hay và cách chụp đẹp hơn: bố cục, tỉ lệ, ánh sáng, khẩu độ."
+  },
+  "nav": {
+    "analyze": "Phân tích ảnh",
+    "history": "Lịch sử",
+    "privacy": "Quyền riêng tư",
+    "signOut": "Đăng xuất"
+  },
+  "localMode": {
+    "title": "Đang chạy chế độ local",
+    "database": "DB nhúng trên máy",
+    "storage": "lưu ảnh trên máy",
+    "ai": "AI giả lập",
+    "hint": "Điền .env.local theo docs/PHASE0-SETUP.md để dùng dịch vụ thật."
+  },
+  "home": {
+    "heroTitle": "Chụp ảnh đẹp hơn sau mỗi lần bấm máy",
+    "heroSubtitle": "Tải 1 tấm ảnh lên — AI đọc toàn bộ thông số, đánh dấu trực tiếp chỗ cần căn chỉnh và góp ý nhẹ nhàng, cụ thể.",
+    "signInGoogle": "Đăng nhập bằng Google",
+    "devLoginTitle": "Đăng nhập thử (chỉ khi chạy local)",
+    "devLoginName": "Tên hiển thị",
+    "devLoginButton": "Vào thử",
+    "noLoginMethod": "Chưa cấu hình đăng nhập. Điền AUTH_GOOGLE_ID và AUTH_GOOGLE_SECRET trong .env.local.",
+    "features": {
+      "composition": {
+        "title": "Bố cục & canh góc",
+        "text": "Lưới 1/3, tỉ lệ vàng, đường chân trời nghiêng bao nhiêu độ."
+      },
+      "crop": {
+        "title": "Tỉ lệ & crop",
+        "text": "Gợi ý khung cắt 4:5, 3:2, 16:9… và xem trước ngay."
+      },
+      "light": {
+        "title": "Ánh sáng & HDR",
+        "text": "Histogram, vùng cháy sáng / mất chi tiết, khi nào cần HDR."
+      },
+      "settings": {
+        "title": "Khẩu độ & thông số",
+        "text": "Đọc EXIF: khẩu độ, tốc độ, ISO — cảnh báo rung tay, nhiễu."
+      }
+    },
+    "quota": "Còn {remaining}/{limit} lượt phân tích hôm nay",
+    "recent": "Phân tích gần đây",
+    "seeAll": "Xem tất cả"
+  },
+  "upload": {
+    "dropTitle": "Kéo thả ảnh vào đây",
+    "dropOr": "hoặc",
+    "choose": "Chọn ảnh",
+    "formats": "JPEG, PNG, WebP, HEIC · tối đa 25MB",
+    "preparing": "Đang đọc thông tin ảnh…",
+    "uploading": "Đang tải ảnh lên… {percent}%",
+    "analyzing": "AI đang xem ảnh của bạn…",
+    "analyzingHint": "Thường mất 5–20 giây",
+    "mode": "Chế độ nhận xét",
+    "modeBasic": "Cơ bản",
+    "modeBasicHint": "Lời lẽ đời thường, mẹo cho điện thoại",
+    "modeAdvanced": "Nâng cao",
+    "modeAdvancedHint": "Thuật ngữ, EV, khẩu độ, thông số máy",
+    "suggested": "Gợi ý",
+    "gpsFound": "Ảnh có thông tin vị trí GPS.",
+    "saveGps": "Lưu vị trí GPS cùng ảnh",
+    "analyze": "Phân tích ảnh",
+    "another": "Chọn ảnh khác",
+    "retry": "Thử lại",
+    "noExif": "Ảnh không có thông tin EXIF (ảnh chụp màn hình, đã chỉnh sửa hoặc bị xoá metadata).",
+    "size": "{width} × {height} px · {size}"
+  },
+  "errors": {
+    "unsupported": "Định dạng ảnh chưa hỗ trợ. Hãy dùng JPEG, PNG, WebP hoặc HEIC.",
+    "too_large": "Ảnh lớn hơn 25MB.",
+    "decode_failed": "Không đọc được ảnh này. Thử xuất lại sang JPEG.",
+    "unauthorized": "Phiên đăng nhập đã hết. Hãy đăng nhập lại.",
+    "invalid_input": "Dữ liệu gửi lên không hợp lệ.",
+    "not_found": "Không tìm thấy ảnh.",
+    "quota_exceeded": "Bạn đã dùng hết lượt phân tích hôm nay. Quay lại vào ngày mai nhé!",
+    "upload_missing": "Ảnh chưa được tải lên xong. Hãy thử lại.",
+    "upload_failed": "Tải ảnh lên thất bại. Kiểm tra mạng rồi thử lại.",
+    "ai_rate_limited": "AI đang quá tải (giới hạn gói miễn phí). Thử lại sau ít phút.",
+    "ai_failed": "AI chưa phân tích được ảnh này. Thử lại nhé.",
+    "server_error": "Có lỗi xảy ra. Thử lại sau."
+  },
+  "result": {
+    "overall": "Điểm tổng",
+    "strengths": "Điểm bạn làm tốt",
+    "improvements": "Gợi ý cải thiện",
+    "nextShot": "3 việc cho lần chụp sau",
+    "settings": "Thông số gợi ý",
+    "facts": "Số liệu đo được",
+    "histogram": "Histogram",
+    "exif": "Thông tin ảnh (EXIF)",
+    "rawMetadata": "Xem toàn bộ metadata gốc",
+    "noRaw": "Không có metadata gốc.",
+    "howTo": "Cách làm",
+    "layers": "Lớp hiển thị",
+    "layer": {
+      "markers": "Điểm cần sửa",
+      "thirds": "Lưới 1/3",
+      "golden": "Tỉ lệ vàng",
+      "horizon": "Đường chân trời",
+      "subjects": "Chủ thể",
+      "clipping": "Vùng cháy / tối",
+      "crop": "Khung crop"
+    },
+    "clippingUnavailable": "Không tải được dữ liệu ảnh để vẽ vùng cháy sáng.",
+    "tilt": "Nghiêng {deg}°",
+    "tiltLevel": "Đường chân trời thẳng",
+    "rotateHint": "Xoay {deg}° {dir, select, ccw {ngược chiều kim đồng hồ} other {theo chiều kim đồng hồ}} để thẳng",
+    "crop": "Gợi ý crop {ratio}",
+    "cropPreview": "Xem trước crop",
+    "cropOriginal": "Xem ảnh gốc",
+    "hdrOn": "Nên bật HDR",
+    "aperture": "Khẩu độ",
+    "shutter": "Tốc độ",
+    "iso": "ISO",
+    "ev": "Bù sáng",
+    "editing": "Hậu kỳ",
+    "reanalyze": "Phân tích lại ở chế độ {mode, select, advanced {Nâng cao} other {Cơ bản}}",
+    "download": "Tải ảnh gốc",
+    "delete": "Xoá ảnh",
+    "deleteConfirm": "Xoá ảnh này và toàn bộ kết quả phân tích?",
+    "back": "Phân tích ảnh khác",
+    "mockNotice": "Kết quả mẫu từ AI giả lập — vị trí chủ thể, chân trời, crop là giả định.",
+    "modeLabel": "Chế độ: {mode, select, advanced {Nâng cao} other {Cơ bản}}",
+    "failed": "Lần phân tích này bị lỗi: {error}",
+    "clippedHi": "Cháy sáng {percent}%",
+    "clippedLo": "Mất chi tiết tối {percent}%",
+    "genre": {
+      "portrait": "Chân dung",
+      "landscape": "Phong cảnh",
+      "street": "Đường phố",
+      "food": "Đồ ăn",
+      "product": "Sản phẩm",
+      "architecture": "Kiến trúc",
+      "night": "Ảnh đêm",
+      "macro": "Cận cảnh",
+      "event": "Sự kiện",
+      "other": "Khác"
+    },
+    "otherLocale": "Nhận xét này được viết bằng {lang, select, en {tiếng Anh} other {tiếng Việt}}.",
+    "reanalyzeLocale": "Viết lại bằng tiếng Việt",
+    "pending": "Ảnh đang được phân tích, tải lại trang sau vài giây."
+  },
+  "category": {
+    "composition": "Bố cục",
+    "crop": "Tỉ lệ & crop",
+    "subject": "Chủ thể",
+    "exposure": "Phơi sáng",
+    "white_balance": "Cân bằng trắng",
+    "settings": "Thông số máy",
+    "hdr": "HDR / Dải sáng",
+    "focus": "Độ nét"
+  },
+  "severity": {
+    "high": "Quan trọng",
+    "medium": "Nên sửa",
+    "low": "Nhỏ",
+    "info": "Thông tin",
+    "positive": "Tốt"
+  },
+  "fact": {
+    "no_exif": "Không có EXIF — không đọc được thông số máy.",
+    "shake_risk": "Tốc độ {shutter} chậm hơn mức an toàn khi cầm tay ({safeShutter}) → dễ rung, nhoè.",
+    "high_iso": "ISO {iso} khá cao → ảnh dễ bị nhiễu hạt.",
+    "wide_aperture": "Khẩu độ lớn f/{f} → xoá phông, vùng nét mỏng.",
+    "diffraction": "Khẩu độ nhỏ f/{f} → có thể giảm độ nét do nhiễu xạ.",
+    "flash_fired": "Đèn flash đã bật.",
+    "exposure_bias": "Bù sáng đặt ở {ev} EV.",
+    "highlights_clipped": "{percent}% điểm ảnh bị cháy sáng, tập trung {region}.",
+    "shadows_clipped": "{percent}% điểm ảnh tối đen mất chi tiết, tập trung {region}.",
+    "high_dynamic_range": "Chênh sáng vượt khả năng cảm biến (cháy {highlights}%, tối đen {shadows}%) → nên dùng HDR.",
+    "underexposed": "Ảnh thiếu sáng (độ sáng trung bình {mean}/255).",
+    "overexposed": "Ảnh dư sáng (độ sáng trung bình {mean}/255).",
+    "well_exposed": "Phơi sáng cân bằng (độ sáng trung bình {mean}/255, gần như không cháy).",
+    "low_contrast": "Tương phản thấp, ảnh hơi \"phẳng\".",
+    "warm_cast": "Tông màu ấm (vàng/cam) — có thể là chủ ý.",
+    "cool_cast": "Tông màu lạnh (xanh dương).",
+    "green_cast": "Hơi ám xanh lá.",
+    "magenta_cast": "Hơi ám hồng/tím.",
+    "soft_focus": "Độ nét đo được thấp → có thể trượt nét hoặc rung.",
+    "sharp": "Vùng nét nhất rất sắc."
+  },
+  "exif": {
+    "camera": "Máy",
+    "lens": "Ống kính",
+    "aperture": "Khẩu độ",
+    "shutter": "Tốc độ",
+    "iso": "ISO",
+    "focal": "Tiêu cự",
+    "focal35": "tương đương {mm}mm",
+    "ev": "Bù sáng",
+    "program": "Chế độ chụp",
+    "metering": "Đo sáng",
+    "wb": "Cân bằng trắng",
+    "flash": "Flash",
+    "takenAt": "Thời gian chụp",
+    "software": "Phần mềm",
+    "dimensions": "Kích thước",
+    "fileSize": "Dung lượng",
+    "format": "Định dạng",
+    "colorSpace": "Không gian màu",
+    "icc": "ICC profile",
+    "gps": "Vị trí GPS",
+    "gpsHidden": "Không lưu (bạn chọn ẩn vị trí)",
+    "device": "Loại thiết bị",
+    "deviceType": "{type, select, phone {Điện thoại} camera {Máy ảnh} other {Không rõ}}",
+    "aspect": "Tỉ lệ khung",
+    "artist": "Tác giả",
+    "copyright": "Bản quyền"
+  },
+  "history": {
+    "title": "Lịch sử phân tích",
+    "empty": "Chưa có ảnh nào được phân tích.",
+    "start": "Phân tích ảnh đầu tiên"
+  },
+  "privacy": {
+    "title": "Quyền riêng tư",
+    "items": [
+      "Ảnh của bạn được lưu ở chế độ riêng tư (private). Chỉ bạn xem được, qua đường link có hạn dùng ngắn.",
+      "Vị trí GPS trong ảnh mặc định KHÔNG được lưu. Bạn có thể chọn lưu khi tải ảnh lên.",
+      "Để phân tích, một bản thu nhỏ của ảnh (tối đa 1536px) được gửi tới Google Gemini. Ở gói miễn phí, Google có thể dùng dữ liệu này để cải thiện sản phẩm của họ.",
+      "Bạn có thể xoá ảnh bất cứ lúc nào trong Lịch sử. Khi xoá, file ảnh và toàn bộ kết quả phân tích bị xoá vĩnh viễn.",
+      "Chúng tôi chỉ dùng email, tên và ảnh đại diện từ tài khoản Google để đăng nhập."
+    ]
+  },
+  "common": {
+    "loading": "Đang tải…",
+    "cancel": "Huỷ",
+    "language": "Ngôn ngữ"
+  },
+  "regions": {
+    "top": "phía trên",
+    "middle": "ở giữa",
+    "bottom": "phía dưới",
+    "left": "bên trái",
+    "center": "chính giữa",
+    "right": "bên phải",
+    "top-left": "góc trên trái",
+    "top-center": "phía trên",
+    "top-right": "góc trên phải",
+    "middle-left": "bên trái",
+    "middle-center": "chính giữa",
+    "middle-right": "bên phải",
+    "bottom-left": "góc dưới trái",
+    "bottom-center": "phía dưới",
+    "bottom-right": "góc dưới phải"
+  }
+}

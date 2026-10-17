@@ -1,0 +1,252 @@
+{
+  "app": {
+    "name": "Photo Coach",
+    "tagline": "Your AI photography coach",
+    "description": "Upload a photo and the AI shows what works and how to shoot better: composition, ratio, light, aperture."
+  },
+  "nav": {
+    "analyze": "Analyze",
+    "history": "History",
+    "privacy": "Privacy",
+    "signOut": "Sign out"
+  },
+  "localMode": {
+    "title": "Running in local mode",
+    "database": "embedded DB",
+    "storage": "photos stored on this machine",
+    "ai": "mock AI",
+    "hint": "Fill in .env.local following docs/PHASE0-SETUP.md to use real services."
+  },
+  "home": {
+    "heroTitle": "Take a better photo every time you press the shutter",
+    "heroSubtitle": "Upload one photo — the AI reads every setting, marks exactly what to adjust and gives kind, specific advice.",
+    "signInGoogle": "Sign in with Google",
+    "devLoginTitle": "Try it (local only)",
+    "devLoginName": "Display name",
+    "devLoginButton": "Enter",
+    "noLoginMethod": "No sign-in method configured. Set AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET in .env.local.",
+    "features": {
+      "composition": {
+        "title": "Composition & level",
+        "text": "Rule of thirds, golden ratio, exactly how many degrees the horizon tilts."
+      },
+      "crop": {
+        "title": "Ratio & crop",
+        "text": "Suggested 4:5, 3:2, 16:9… crops with instant preview."
+      },
+      "light": {
+        "title": "Light & HDR",
+        "text": "Histogram, blown highlights / crushed shadows, when to use HDR."
+      },
+      "settings": {
+        "title": "Aperture & settings",
+        "text": "Reads EXIF: aperture, shutter, ISO — warns about shake and noise."
+      }
+    },
+    "quota": "{remaining}/{limit} analyses left today",
+    "recent": "Recent analyses",
+    "seeAll": "See all"
+  },
+  "upload": {
+    "dropTitle": "Drop a photo here",
+    "dropOr": "or",
+    "choose": "Choose photo",
+    "formats": "JPEG, PNG, WebP, HEIC · up to 25MB",
+    "preparing": "Reading photo information…",
+    "uploading": "Uploading… {percent}%",
+    "analyzing": "The AI is looking at your photo…",
+    "analyzingHint": "Usually takes 5–20 seconds",
+    "mode": "Feedback style",
+    "modeBasic": "Basic",
+    "modeBasicHint": "Everyday words, phone tips",
+    "modeAdvanced": "Advanced",
+    "modeAdvancedHint": "Terms, EV, aperture, camera settings",
+    "suggested": "Suggested",
+    "gpsFound": "This photo contains GPS location.",
+    "saveGps": "Save GPS location with the photo",
+    "analyze": "Analyze photo",
+    "another": "Choose another",
+    "retry": "Try again",
+    "noExif": "No EXIF data (screenshot, edited or metadata removed).",
+    "size": "{width} × {height} px · {size}"
+  },
+  "errors": {
+    "unsupported": "Unsupported format. Use JPEG, PNG, WebP or HEIC.",
+    "too_large": "The photo is larger than 25MB.",
+    "decode_failed": "Could not read this photo. Try exporting it as JPEG.",
+    "unauthorized": "Your session expired. Please sign in again.",
+    "invalid_input": "Invalid data.",
+    "not_found": "Photo not found.",
+    "quota_exceeded": "You've used all of today's analyses. See you tomorrow!",
+    "upload_missing": "The photo hasn't finished uploading. Please try again.",
+    "upload_failed": "Upload failed. Check your connection and try again.",
+    "ai_rate_limited": "The AI is busy (free-tier limit). Try again in a few minutes.",
+    "ai_failed": "The AI couldn't analyze this photo. Please try again.",
+    "server_error": "Something went wrong. Please try again later."
+  },
+  "result": {
+    "overall": "Overall",
+    "strengths": "What you did well",
+    "improvements": "How to make it even better",
+    "nextShot": "3 things for your next shot",
+    "settings": "Suggested settings",
+    "facts": "Measured facts",
+    "histogram": "Histogram",
+    "exif": "Photo info (EXIF)",
+    "rawMetadata": "Show all original metadata",
+    "noRaw": "No original metadata.",
+    "howTo": "How to",
+    "layers": "Overlays",
+    "layer": {
+      "markers": "Issues",
+      "thirds": "Rule of thirds",
+      "golden": "Golden ratio",
+      "horizon": "Horizon",
+      "subjects": "Subjects",
+      "clipping": "Clipping",
+      "crop": "Crop frame"
+    },
+    "clippingUnavailable": "Couldn't load image data to draw clipping.",
+    "tilt": "Tilted {deg}°",
+    "tiltLevel": "Horizon is level",
+    "rotateHint": "Rotate {deg}° {dir, select, ccw {counter-clockwise} other {clockwise}} to level",
+    "crop": "Suggested crop {ratio}",
+    "cropPreview": "Preview crop",
+    "cropOriginal": "Show original",
+    "hdrOn": "Turn on HDR",
+    "aperture": "Aperture",
+    "shutter": "Shutter",
+    "iso": "ISO",
+    "ev": "Exposure comp.",
+    "editing": "Editing",
+    "reanalyze": "Re-analyze in {mode, select, advanced {Advanced} other {Basic}} mode",
+    "download": "Download original",
+    "delete": "Delete photo",
+    "deleteConfirm": "Delete this photo and all its analyses?",
+    "back": "Analyze another photo",
+    "mockNotice": "Sample result from the mock AI — subject, horizon and crop positions are assumed.",
+    "modeLabel": "Mode: {mode, select, advanced {Advanced} other {Basic}}",
+    "failed": "This analysis failed: {error}",
+    "clippedHi": "Blown {percent}%",
+    "clippedLo": "Crushed {percent}%",
+    "genre": {
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "street": "Street",
+      "food": "Food",
+      "product": "Product",
+      "architecture": "Architecture",
+      "night": "Night",
+      "macro": "Macro",
+      "event": "Event",
+      "other": "Other"
+    },
+    "otherLocale": "This feedback is written in {lang, select, en {English} other {Vietnamese}}.",
+    "reanalyzeLocale": "Rewrite in English",
+    "pending": "This photo is still being analyzed, reload in a few seconds."
+  },
+  "category": {
+    "composition": "Composition",
+    "crop": "Ratio & crop",
+    "subject": "Subject",
+    "exposure": "Exposure",
+    "white_balance": "White balance",
+    "settings": "Camera settings",
+    "hdr": "HDR / Dynamic range",
+    "focus": "Focus"
+  },
+  "severity": {
+    "high": "Important",
+    "medium": "Worth fixing",
+    "low": "Minor",
+    "info": "Info",
+    "positive": "Good"
+  },
+  "fact": {
+    "no_exif": "No EXIF — camera settings unavailable.",
+    "shake_risk": "Shutter {shutter} is slower than the safe handheld speed ({safeShutter}) → shake/blur risk.",
+    "high_iso": "ISO {iso} is high → noise likely.",
+    "wide_aperture": "Wide aperture f/{f} → background blur, thin focus plane.",
+    "diffraction": "Small aperture f/{f} → may soften due to diffraction.",
+    "flash_fired": "Flash fired.",
+    "exposure_bias": "Exposure compensation {ev} EV.",
+    "highlights_clipped": "{percent}% of pixels are blown out, mostly {region}.",
+    "shadows_clipped": "{percent}% of pixels are crushed to black, mostly {region}.",
+    "high_dynamic_range": "Scene exceeds the sensor's range (blown {highlights}%, crushed {shadows}%) → use HDR.",
+    "underexposed": "Underexposed (mean brightness {mean}/255).",
+    "overexposed": "Overexposed (mean brightness {mean}/255).",
+    "well_exposed": "Well balanced exposure (mean {mean}/255, almost no clipping).",
+    "low_contrast": "Low contrast, the image looks a bit flat.",
+    "warm_cast": "Warm (orange) tones — may be intentional.",
+    "cool_cast": "Cool (blue) tones.",
+    "green_cast": "Slight green tint.",
+    "magenta_cast": "Slight magenta tint.",
+    "soft_focus": "Low measured sharpness → possible missed focus or shake.",
+    "sharp": "The sharpest area is very crisp."
+  },
+  "exif": {
+    "camera": "Camera",
+    "lens": "Lens",
+    "aperture": "Aperture",
+    "shutter": "Shutter",
+    "iso": "ISO",
+    "focal": "Focal length",
+    "focal35": "{mm}mm equiv.",
+    "ev": "Exposure comp.",
+    "program": "Program",
+    "metering": "Metering",
+    "wb": "White balance",
+    "flash": "Flash",
+    "takenAt": "Taken at",
+    "software": "Software",
+    "dimensions": "Dimensions",
+    "fileSize": "File size",
+    "format": "Format",
+    "colorSpace": "Color space",
+    "icc": "ICC profile",
+    "gps": "GPS location",
+    "gpsHidden": "Not saved (you chose to hide location)",
+    "device": "Device type",
+    "deviceType": "{type, select, phone {Phone} camera {Camera} other {Unknown}}",
+    "aspect": "Aspect ratio",
+    "artist": "Artist",
+    "copyright": "Copyright"
+  },
+  "history": {
+    "title": "Analysis history",
+    "empty": "No photos analyzed yet.",
+    "start": "Analyze your first photo"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "items": [
+      "Your photos are stored privately. Only you can view them, through short-lived links.",
+      "GPS location is NOT saved by default. You can choose to keep it when uploading.",
+      "To analyze, a downscaled copy (max 1536px) is sent to Google Gemini. On the free tier, Google may use this data to improve its products.",
+      "You can delete a photo at any time from History. Deleting removes the file and all analyses permanently.",
+      "We only use your Google account's email, name and avatar to sign you in."
+    ]
+  },
+  "common": {
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "language": "Language"
+  },
+  "regions": {
+    "top": "at the top",
+    "middle": "in the middle",
+    "bottom": "at the bottom",
+    "left": "on the left",
+    "center": "in the center",
+    "right": "on the right",
+    "top-left": "top-left",
+    "top-center": "at the top",
+    "top-right": "top-right",
+    "middle-left": "on the left",
+    "middle-center": "in the center",
+    "middle-right": "on the right",
+    "bottom-left": "bottom-left",
+    "bottom-center": "at the bottom",
+    "bottom-right": "bottom-right"
+  }
+}
