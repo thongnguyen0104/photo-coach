@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, Languages, Loader2, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Download, Languages, Loader2, RefreshCw, Trash2, Upload, Wand2 } from "lucide-react";
 import Link from "next/link";
 
 export interface AnalysisActionsProps {
+  analysisId: string;
   photoId: string;
   mode: "basic" | "advanced";
   analysisLocale: string;
@@ -14,8 +15,9 @@ export interface AnalysisActionsProps {
   fileName: string;
 }
 
-export function AnalysisActions({ photoId, mode, analysisLocale, originalUrl, fileName }: AnalysisActionsProps) {
+export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, originalUrl, fileName }: AnalysisActionsProps) {
   const t = useTranslations("result");
+  const tEdit = useTranslations("editor");
   const tErr = useTranslations("errors");
   const locale = useLocale();
   const router = useRouter();
@@ -64,7 +66,11 @@ export function AnalysisActions({ photoId, mode, analysisLocale, originalUrl, fi
         </div>
       )}
       <div className="flex flex-wrap gap-2">
-        <Link href="/" className="btn btn-primary">
+        <Link href={`/analyze/${analysisId}/edit`} className="btn btn-primary">
+          <Wand2 className="size-4" aria-hidden />
+          {tEdit("open")}
+        </Link>
+        <Link href="/" className="btn btn-ghost">
           <Upload className="size-4" aria-hidden />
           {t("back")}
         </Link>

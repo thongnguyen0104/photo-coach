@@ -88,7 +88,12 @@ async function readRawMetadata(file: File): Promise<RawMetadata | null> {
   }
 }
 
-async function toDisplayBlob(file: File, mime: AcceptedMime): Promise<Blob> {
+/** Mime đã lưu trong DB → AcceptedMime (mặc định JPEG). */
+export function detectMimeFromType(type: string): AcceptedMime {
+  return (ACCEPTED_MIME as readonly string[]).includes(type) ? (type as AcceptedMime) : "image/jpeg";
+}
+
+export async function toDisplayBlob(file: File, mime: AcceptedMime): Promise<Blob> {
   if (mime !== "image/heic" && mime !== "image/heif") return file;
   // Safari đọc được HEIC trực tiếp; trình duyệt khác cần chuyển sang JPEG
   try {

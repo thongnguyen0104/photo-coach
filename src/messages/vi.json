@@ -248,5 +248,67 @@
     "bottom-left": "góc dưới trái",
     "bottom-center": "phía dưới",
     "bottom-right": "góc dưới phải"
+  },
+  "editor": {
+    "title": "Chỉnh sửa ảnh",
+    "open": "Chỉnh sửa ảnh",
+    "back": "Về kết quả phân tích",
+    "loading": "Đang tải ảnh gốc…",
+    "loadFailed": "Không tải được ảnh gốc. Kiểm tra mạng rồi thử lại.",
+    "retry": "Thử lại",
+    "reset": "Đặt lại",
+    "undo": "Hoàn tác (Ctrl+Z)",
+    "redo": "Làm lại (Ctrl+Shift+Z)",
+    "compare": "Giữ để xem ảnh gốc",
+    "original": "Ảnh gốc",
+    "download": "Tải ảnh về",
+    "share": "Chia sẻ / Lưu vào thư viện ảnh",
+    "exportFailed": "Không xuất được ảnh: {error}",
+    "outputSize": "Ảnh tải về: {w} × {h} px",
+    "noMetadata": "không kèm EXIF/GPS",
+    "downscaled": "ảnh gốc rất lớn nên được thu nhỏ để trình duyệt xử lý được",
+    "aiApply": "Áp dụng gợi ý AI",
+    "aiHint": "Tự làm thẳng chân trời, cắt theo khung AI gợi ý và chỉnh màu & sáng theo kết quả phân tích. Bạn vẫn chỉnh lại được từng thanh.",
+    "aiApplied": "Đã áp dụng:",
+    "aiNothing": "Theo phân tích, ảnh này không cần chỉnh thêm gì.",
+    "applied": {
+      "rotate": "Xoay {deg}°",
+      "crop": "Cắt {ratio}"
+    },
+    "tabs": {
+      "remove": "Xoá vật thể",
+      "crop": "Cắt & xoay",
+      "adjust": "Màu & sáng"
+    },
+    "remove": {
+      "hint": "Tô lên vật thể muốn xoá (người qua đường, rác, dây điện…). Thả tay ra là AI tự xoá.",
+      "brush": "Cỡ cọ",
+      "modelFirst": "Lần đầu dùng cần tải model AI (~{mb} MB, miễn phí). Trình duyệt sẽ lưu lại cho các lần sau.",
+      "modelDownload": "Tải model AI",
+      "modelLoading": "Đang tải model AI… {percent}%",
+      "modelPreparing": "Đang chuẩn bị model AI…",
+      "modelReady": "Model AI đã sẵn sàng — chạy ngay trên máy bạn, ảnh không gửi đi đâu.",
+      "modelError": "Không tải được model AI: {error}",
+      "working": "AI đang xoá…",
+      "failed": "Xoá không thành công: {error}",
+      "tip": "Mẹo: tô phủ kín cả bóng đổ của vật thể. Vật quá lớn có thể bị nhoè — xoá từng phần nhỏ sẽ đẹp hơn."
+    },
+    "crop": {
+      "ratio": "Tỉ lệ khung",
+      "original": "Gốc",
+      "ai": "AI gợi ý",
+      "size": "Kích thước khung",
+      "rotate": "Làm thẳng",
+      "level": "Thẳng theo chân trời ({deg}°)",
+      "dragHint": "Kéo khung trên ảnh để chọn vị trí cắt."
+    },
+    "adjust": {
+      "exposure": "Phơi sáng",
+      "contrast": "Tương phản",
+      "highlights": "Vùng sáng",
+      "shadows": "Vùng tối",
+      "saturation": "Độ bão hoà",
+      "warmth": "Nhiệt độ màu"
+    }
   }
 }
