@@ -25,7 +25,7 @@ export default async function AnalyzePage({ params }: { params: Promise<{ id: st
 
   const [t, locale, storage] = await Promise.all([getTranslations("result"), getLocale(), getStorage()]);
   const [previewUrl, originalUrl] = await Promise.all([storage.presignGet(photo.previewKey), storage.presignGet(photo.originalKey)]);
-  const actions = { photoId: photo.id, mode: analysis.mode, analysisLocale: analysis.locale, originalUrl, fileName: photo.fileName };
+  const actions = { analysisId: analysis.id, photoId: photo.id, mode: analysis.mode, analysisLocale: analysis.locale, originalUrl, fileName: photo.fileName };
 
   if (analysis.status !== "done" || !analysis.result) {
     return (

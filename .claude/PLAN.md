@@ -6,7 +6,8 @@
 |---|---|
 | Phase 0 | Công cụ + hướng dẫn xong (`docs/PHASE0-SETUP.md`, `tools/setup-check`). Đã có: Neon, Gemini. **Còn thiếu: Google OAuth, Oracle + spike CORS** |
 | Phase 1 | **Code xong + test xong** (57 unit/integration, E2E desktop + mobile với Gemini thật). Còn: deploy Vercel (`docs/PHASE1-DEPLOY.md`) — cần Google OAuth + Oracle trước |
-| Phase 2, 3 | Chưa bắt đầu |
+| Phase 2 | Chưa bắt đầu |
+| Phase 3 | **Trình chỉnh sửa ảnh xong** (2026-10-18): xoá vật thể (MI-GAN trên trình duyệt), cắt & xoay, màu & sáng, "Áp dụng gợi ý AI", tải ảnh về. Phần còn lại của Phase 3 chưa làm |
 
 ### Khác so với kế hoạch ban đầu (và lý do)
 - **Next.js 16.4** thay vì 15 — bản ổn định mới nhất. Đã tắt `cacheComponents` (app cá nhân hoá theo user → render động hợp lý hơn).

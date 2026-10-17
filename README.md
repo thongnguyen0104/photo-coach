@@ -78,3 +78,8 @@ tools/setup-check/        công cụ Phase 0
 - **Gemini từ chối JSON schema có `minimum/maximum/minItems/maxItems`** (lỗi 400 "invalid argument"). Giới hạn chỉ ghi trong `description`; `src/lib/analysis/postprocess.ts` kẹp giá trị và cắt mảng. Có test chặn lỗi này quay lại.
 - **Số đo bằng code (facts)** — độ sáng, cháy sáng, rung tay, ISO… — được đưa vào prompt để AI không bịa thông số, và hiển thị riêng ở mục "Số liệu đo được".
 - Đổi prompt → tăng `PROMPT_VERSION` trong `src/lib/analysis/prompt.ts` (kết quả cũ không bị dùng lại từ cache).
+- **Trình chỉnh sửa ảnh** (`/analyze/[id]/edit`, code ở `src/lib/editor/` + `src/components/editor/`) chạy hoàn toàn trên trình duyệt, 0đ:
+  - Xoá vật thể **mặc định tắt** — bật bằng `ENABLE_OBJECT_REMOVAL=1` (đọc ở server; trên Vercel đổi biến xong phải Redeploy, không cần sửa code; tắt thì ẩn tab "Xoá vật thể").
+  - Xoá vật thể bằng model **MI-GAN** (MIT, ~28MB ONNX) qua `onnxruntime-web` trong Web Worker. Model tải từ Hugging Face (ghim commit + kiểm tra SHA-256), lưu Cache Storage cho lần sau. File `.wasm` lấy từ jsDelivr đúng phiên bản `onnxruntime-web` đang cài. Mask quy ước **0 = vùng xoá, 255 = giữ**.
+  - Gemini có model sửa ảnh nhưng gói free = 0 request (đo 10/2026) → không dùng. SeaArt không có API công khai.
+  - Ảnh làm việc giới hạn 16.7MP (giới hạn canvas Safari iOS). Ảnh tải về không kèm EXIF/GPS.

@@ -48,6 +48,10 @@ export const config = {
   get geminiModel() {
     return process.env.GEMINI_MODEL?.trim() || "gemini-flash-latest";
   },
+  /** Tính năng xoá vật thể (model MI-GAN chạy trên trình duyệt) — mặc định tắt. */
+  get objectRemoval() {
+    return /^(1|true|on|yes)$/i.test(process.env.ENABLE_OBJECT_REMOVAL?.trim() ?? "");
+  },
   get dailyQuota() {
     const n = Number(process.env.DAILY_QUOTA);
     return Number.isFinite(n) && n > 0 ? Math.floor(n) : 10;

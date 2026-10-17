@@ -248,5 +248,67 @@
     "bottom-left": "bottom-left",
     "bottom-center": "at the bottom",
     "bottom-right": "bottom-right"
+  },
+  "editor": {
+    "title": "Edit photo",
+    "open": "Edit photo",
+    "back": "Back to analysis",
+    "loading": "Loading the original photo…",
+    "loadFailed": "Couldn't load the original photo. Check your connection and try again.",
+    "retry": "Try again",
+    "reset": "Reset",
+    "undo": "Undo (Ctrl+Z)",
+    "redo": "Redo (Ctrl+Shift+Z)",
+    "compare": "Hold to see the original",
+    "original": "Original",
+    "download": "Download",
+    "share": "Share / Save to photos",
+    "exportFailed": "Couldn't export the photo: {error}",
+    "outputSize": "Download size: {w} × {h} px",
+    "noMetadata": "without EXIF/GPS",
+    "downscaled": "the original is very large, so it was scaled down for the browser",
+    "aiApply": "Apply AI suggestions",
+    "aiHint": "Straightens the horizon, crops to the suggested frame and adjusts light & colour from the analysis. You can still fine-tune every slider.",
+    "aiApplied": "Applied:",
+    "aiNothing": "According to the analysis, this photo needs no further edits.",
+    "applied": {
+      "rotate": "Rotate {deg}°",
+      "crop": "Crop {ratio}"
+    },
+    "tabs": {
+      "remove": "Remove objects",
+      "crop": "Crop & rotate",
+      "adjust": "Light & colour"
+    },
+    "remove": {
+      "hint": "Paint over what you want to remove (passers-by, litter, wires…). Lift your finger and the AI erases it.",
+      "brush": "Brush size",
+      "modelFirst": "The first time, the AI model needs to download (~{mb} MB, free). Your browser keeps it for next time.",
+      "modelDownload": "Download AI model",
+      "modelLoading": "Downloading AI model… {percent}%",
+      "modelPreparing": "Preparing AI model…",
+      "modelReady": "AI model ready — it runs on your device, your photo isn't sent anywhere.",
+      "modelError": "Couldn't load the AI model: {error}",
+      "working": "AI is erasing…",
+      "failed": "Removal failed: {error}",
+      "tip": "Tip: cover the object's shadow too. Very large objects may look smudged — erasing in small parts works better."
+    },
+    "crop": {
+      "ratio": "Aspect ratio",
+      "original": "Original",
+      "ai": "AI suggestion",
+      "size": "Frame size",
+      "rotate": "Straighten",
+      "level": "Level to horizon ({deg}°)",
+      "dragHint": "Drag the frame on the photo to position the crop."
+    },
+    "adjust": {
+      "exposure": "Exposure",
+      "contrast": "Contrast",
+      "highlights": "Highlights",
+      "shadows": "Shadows",
+      "saturation": "Saturation",
+      "warmth": "Temperature"
+    }
   }
 }
