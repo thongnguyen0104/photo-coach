@@ -8,7 +8,8 @@
     "analyze": "Phân tích ảnh",
     "history": "Lịch sử",
     "privacy": "Quyền riêng tư",
-    "signOut": "Đăng xuất"
+    "signOut": "Đăng xuất",
+    "camera": "Chụp ảnh"
   },
   "localMode": {
     "title": "Đang chạy chế độ local",
@@ -68,7 +69,11 @@
     "another": "Chọn ảnh khác",
     "retry": "Thử lại",
     "noExif": "Ảnh không có thông tin EXIF (ảnh chụp màn hình, đã chỉnh sửa hoặc bị xoá metadata).",
-    "size": "{width} × {height} px · {size}"
+    "size": "{width} × {height} px · {size}",
+    "liveCamera": "Chụp với hướng dẫn trực tiếp",
+    "capturedHint": "Ảnh chụp bằng camera trong app — trình duyệt không ghi thông số chụp (khẩu độ, tốc độ, ISO).",
+    "retake": "Chụp lại",
+    "saveToDevice": "Lưu về máy"
   },
   "errors": {
     "unsupported": "Định dạng ảnh chưa hỗ trợ. Hãy dùng JPEG, PNG, WebP hoặc HEIC.",
@@ -182,7 +187,10 @@
     "green_cast": "Hơi ám xanh lá.",
     "magenta_cast": "Hơi ám hồng/tím.",
     "soft_focus": "Độ nét đo được thấp → có thể trượt nét hoặc rung.",
-    "sharp": "Vùng nét nhất rất sắc."
+    "sharp": "Vùng nét nhất rất sắc.",
+    "live_capture": "Chụp bằng camera trong app — trình duyệt không ghi thông số máy.",
+    "capture_level": "Lúc bấm chụp máy được giữ thẳng (nghiêng {tilt}°).",
+    "capture_tilt": "Lúc bấm chụp máy nghiêng {tilt}°."
   },
   "exif": {
     "camera": "Máy",
@@ -309,6 +317,48 @@
       "shadows": "Vùng tối",
       "saturation": "Độ bão hoà",
       "warmth": "Nhiệt độ màu"
+    }
+  },
+  "camera": {
+    "title": "Chụp với hướng dẫn",
+    "intro": "Mở camera ngay trong app. Trong lúc bạn ngắm, app hiện lưới bố cục, thước cân bằng và nhắc khi ảnh quá sáng hay quá tối. Chụp xong ảnh được chuyển thẳng sang bước phân tích.",
+    "featureGrid": "Lưới bố cục: một phần ba, tỉ lệ vàng, đường chéo, tâm. Có khung 4:5, 1:1, 9:16, 3:2.",
+    "featureLevel": "Thước cân bằng: chuyển xanh khi máy thẳng (lệch dưới 1°).",
+    "featureLight": "Nhắc khi bị ngược sáng, trời cháy sáng hoặc thiếu sáng.",
+    "limitation": "Lưu ý: trình duyệt không chỉnh được khẩu độ, tốc độ hay ISO của camera điện thoại, và ảnh chụp trong app không có thông số EXIF. App giúp bạn về cách cầm máy, bố cục và ánh sáng. Muốn đủ chất lượng và thông số, hãy dùng camera gốc của máy.",
+    "start": "Bật camera",
+    "retry": "Thử lại",
+    "nativeCamera": "Dùng camera gốc",
+    "back": "Về trang chính",
+    "close": "Đóng camera",
+    "shutter": "Chụp",
+    "grid": "Đổi lưới bố cục",
+    "grids": {
+      "thirds": "1/3",
+      "golden": "Tỉ lệ vàng",
+      "diagonal": "Chéo",
+      "center": "Tâm",
+      "none": "Tắt lưới"
+    },
+    "aspect": "Đổi tỉ lệ khung",
+    "aspectFull": "Toàn khung",
+    "exposure": "Bù sáng",
+    "level": "Thẳng",
+    "tilt": "Nghiêng {deg}°",
+    "capturedTitle": "Ảnh vừa chụp",
+    "hints": {
+      "backlit": "Ngược sáng — xoay để nguồn sáng chiếu từ bên cạnh, hoặc chụp bằng camera gốc có HDR",
+      "sky_clipped": "Trời đang cháy sáng — hạ máy để bớt phần trời, hoặc giảm phơi sáng",
+      "highlights_clipped": "Có vùng cháy sáng — đừng để chỗ quá sáng chiếm nhiều khung",
+      "too_dark": "Hơi tối — tìm thêm ánh sáng và giữ máy thật chắc khi bấm",
+      "too_bright": "Ảnh đang quá sáng — giảm phơi sáng hoặc tránh nắng gắt"
+    },
+    "errors": {
+      "camera_unsupported": "Trình duyệt này không mở được camera. Hãy dùng nút \"Dùng camera gốc\".",
+      "camera_denied": "Bạn chưa cho phép dùng camera. Bấm biểu tượng ổ khoá trên thanh địa chỉ → cho phép Camera, rồi thử lại.",
+      "camera_not_found": "Không tìm thấy camera trên thiết bị này.",
+      "camera_busy": "Camera đang được ứng dụng khác dùng. Đóng ứng dụng đó rồi thử lại.",
+      "camera_failed": "Không mở được camera. Thử lại nhé."
     }
   }
 }

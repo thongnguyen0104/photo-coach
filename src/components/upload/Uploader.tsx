@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
-import { ImageUp, Loader2, MapPin, RotateCcw, Sparkles } from "lucide-react";
+import { Camera, Download, ImageUp, Loader2, MapPin, RotateCcw, Sparkles } from "lucide-react";
 import { prepareImage, PrepareError, uploadWithProgress, type PreparedImage } from "@/lib/image/prepare";
-import { cameraName, formatBytes, formatShutter } from "@/lib/image/metadata";
+import { cameraName, formatBytes, formatShutter, normalizeMetadata, type CaptureInfo, type RawMetadata } from "@/lib/image/metadata";
 import type { AnalysisResponse, ApiErrorCode, UploadResponse } from "@/lib/api-schemas";
 
 type Mode = "basic" | "advanced";
@@ -75,7 +76,16 @@ async function uploadAndAnalyze(
   return analysis.analysisId;
 }
 
-export function Uploader() {
+interface Props {
+  /** Ảnh có sẵn (vd vừa chụp bằng camera trong app) → bỏ qua bước chọn ảnh */
+  initialFile?: File;
+  /** Thông tin lúc chụp bằng camera trong app — gửi kèm để AI biết */
+  capture?: CaptureInfo;
+  /** Thay nút "Chọn ảnh khác" (vd quay lại camera để chụp lại) */
+  onCancel?: () => void;
+}
+
+export function Uploader({ initialFile, capture, onCancel }: Props = {}) {
   const t = useTranslations("upload");
   const tErr = useTranslations("errors");
   const locale = useLocale();
@@ -98,13 +108,26 @@ export function Uploader() {
     setState({ step: "preparing" });
     try {
       const prepared = await prepareImage(file);
+      if (capture) {
+        // Ghi thông tin chụp vào metadata gốc → server chuẩn hoá lại giống hệt
+        prepared.rawMetadata = { ...(prepared.rawMetadata ?? {}), capture: capture as unknown as RawMetadata[string] };
+        prepared.metadata = normalizeMetadata(prepared.rawMetadata);
+      }
       setMode(prepared.metadata.deviceType === "camera" ? "advanced" : "basic");
       setSaveGps(false);
       setState({ step: "ready", img: prepared });
     } catch (err) {
       setState({ step: "error", code: err instanceof PrepareError ? err.code : "decode_failed" });
     }
-  }, []);
+  }, [capture]);
+
+  // Ảnh truyền vào từ ngoài → chuẩn bị ngay (ref chặn chạy 2 lần ở Strict Mode)
+  const initialRef = useRef<File | null>(null);
+  useEffect(() => {
+    if (!initialFile || initialRef.current === initialFile) return;
+    initialRef.current = initialFile;
+    handleFile(initialFile);
+  }, [initialFile, handleFile]);
 
   async function start(prepared: PreparedImage) {
     setState({ step: "uploading", img: prepared, percent: 0 });
@@ -122,6 +145,7 @@ export function Uploader() {
   }
 
   const reset = () => {
+    if (onCancel) return onCancel();
     setState({ step: "idle" });
     if (inputRef.current) inputRef.current.value = "";
   };
@@ -159,6 +183,10 @@ export function Uploader() {
               {t("choose")}
             </button>
             <p className="text-xs text-muted">{t("formats")}</p>
+            <Link href="/camera" className="btn btn-ghost text-sm" data-testid="open-camera">
+              <Camera className="size-4" aria-hidden />
+              {t("liveCamera")}
+            </Link>
             {state.step === "error" && (
               <p role="alert" className="text-sm font-medium text-bad">
                 {tErr(state.code as never)}
@@ -221,7 +249,9 @@ export function Uploader() {
           <p className="text-sm text-muted">
             {t("size", { width: img!.width, height: img!.height, size: formatBytes(img!.file.size) })}
           </p>
-          {specs.length > 0 ? (
+          {m.capture ? (
+            <p className="text-sm text-muted">{t("capturedHint")}</p>
+          ) : specs.length > 0 ? (
             <p className="text-sm">{specs.join(" · ")}</p>
           ) : (
             <p className="text-sm text-muted">{t("noExif")}</p>
@@ -274,8 +304,15 @@ export function Uploader() {
             {state.step === "error" ? t("retry") : t("analyze")}
           </button>
           <button type="button" className="btn btn-ghost" disabled={busy} onClick={reset}>
-            {t("another")}
+            {onCancel ? <Camera className="size-4" aria-hidden /> : null}
+            {t(onCancel ? "retake" : "another")}
           </button>
+          {m.capture && (
+            <a href={img!.displayUrl} download={img!.file.name} className="btn btn-ghost" data-testid="save-capture">
+              <Download className="size-4" aria-hidden />
+              {t("saveToDevice")}
+            </a>
+          )}
         </div>
       </div>
     </div>

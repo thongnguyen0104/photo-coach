@@ -8,7 +8,8 @@
     "analyze": "Analyze",
     "history": "History",
     "privacy": "Privacy",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "camera": "Shoot"
   },
   "localMode": {
     "title": "Running in local mode",
@@ -68,7 +69,11 @@
     "another": "Choose another",
     "retry": "Try again",
     "noExif": "No EXIF data (screenshot, edited or metadata removed).",
-    "size": "{width} × {height} px · {size}"
+    "size": "{width} × {height} px · {size}",
+    "liveCamera": "Shoot with live coaching",
+    "capturedHint": "Taken with the in-app camera — browsers don't record shooting settings (aperture, shutter, ISO).",
+    "retake": "Retake",
+    "saveToDevice": "Save to device"
   },
   "errors": {
     "unsupported": "Unsupported format. Use JPEG, PNG, WebP or HEIC.",
@@ -182,7 +187,10 @@
     "green_cast": "Slight green tint.",
     "magenta_cast": "Slight magenta tint.",
     "soft_focus": "Low measured sharpness → possible missed focus or shake.",
-    "sharp": "The sharpest area is very crisp."
+    "sharp": "The sharpest area is very crisp.",
+    "live_capture": "Taken with the in-app camera — the browser records no camera settings.",
+    "capture_level": "The camera was held level when you pressed the shutter ({tilt}° tilt).",
+    "capture_tilt": "The camera was tilted {tilt}° when you pressed the shutter."
   },
   "exif": {
     "camera": "Camera",
@@ -309,6 +317,48 @@
       "shadows": "Shadows",
       "saturation": "Saturation",
       "warmth": "Temperature"
+    }
+  },
+  "camera": {
+    "title": "Live coaching",
+    "intro": "Open the camera right in the app. While you frame, it shows composition grids, a level and warns you when the shot is too bright or too dark. After you shoot, the photo goes straight to analysis.",
+    "featureGrid": "Composition grids: thirds, golden ratio, diagonals, centre. Frames for 4:5, 1:1, 9:16, 3:2.",
+    "featureLevel": "Level: turns green when the camera is straight (under 1°).",
+    "featureLight": "Warns about backlight, blown-out sky or low light.",
+    "limitation": "Note: browsers can't control your phone camera's aperture, shutter or ISO, and photos taken in the app have no EXIF settings. The app coaches how you hold, frame and light the shot. For full quality and settings, use your phone's own camera.",
+    "start": "Turn on camera",
+    "retry": "Try again",
+    "nativeCamera": "Use phone camera",
+    "back": "Back to home",
+    "close": "Close camera",
+    "shutter": "Take photo",
+    "grid": "Change grid",
+    "grids": {
+      "thirds": "1/3",
+      "golden": "Golden",
+      "diagonal": "Diagonal",
+      "center": "Centre",
+      "none": "No grid"
+    },
+    "aspect": "Change frame ratio",
+    "aspectFull": "Full",
+    "exposure": "Exposure",
+    "level": "Level",
+    "tilt": "Tilted {deg}°",
+    "capturedTitle": "Your photo",
+    "hints": {
+      "backlit": "Backlit — turn so the light comes from the side, or use your phone camera with HDR",
+      "sky_clipped": "Sky is blown out — tilt down to show less sky, or lower exposure",
+      "highlights_clipped": "Blown-out areas — keep very bright spots out of most of the frame",
+      "too_dark": "A bit dark — find more light and hold the phone very still",
+      "too_bright": "Too bright — lower exposure or avoid harsh sun"
+    },
+    "errors": {
+      "camera_unsupported": "This browser can't open the camera. Use \"Use phone camera\" instead.",
+      "camera_denied": "Camera permission was denied. Tap the lock icon in the address bar → allow Camera, then try again.",
+      "camera_not_found": "No camera found on this device.",
+      "camera_busy": "Another app is using the camera. Close it and try again.",
+      "camera_failed": "Couldn't open the camera. Please try again."
     }
   }
 }

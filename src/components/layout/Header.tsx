@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Aperture, LogOut } from "lucide-react";
+import { Aperture, Camera, LogOut } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { signOutAction } from "@/app/actions";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -23,6 +23,9 @@ export async function Header({ user }: Props) {
             <Link href="/" className="rounded-lg px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
               {t("nav.analyze")}
             </Link>
+            <Link href="/camera" className="rounded-lg px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
+              {t("nav.camera")}
+            </Link>
             <Link href="/history" className="rounded-lg px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-text">
               {t("nav.history")}
             </Link>
@@ -33,6 +36,10 @@ export async function Header({ user }: Props) {
           <LocaleSwitcher />
           {user && (
             <>
+              <Link href="/camera" className="rounded-lg p-2 text-muted hover:text-text sm:hidden" title={t("nav.camera")}>
+                <Camera className="size-5" aria-hidden />
+                <span className="sr-only">{t("nav.camera")}</span>
+              </Link>
               <Link href="/history" className="rounded-lg px-2 py-1.5 text-sm text-muted hover:text-text sm:hidden">
                 {t("nav.history")}
               </Link>

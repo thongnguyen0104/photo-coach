@@ -28,7 +28,16 @@ export function deriveFacts(meta: NormalizedMetadata, stats: ImageStats): Fact[]
   const facts: Fact[] = [];
   const isPhone = meta.deviceType === "phone";
 
-  if (!meta.hasExif) facts.push({ id: "no_exif", category: "settings", severity: "info", values: {} });
+  if (meta.capture) {
+    // Chụp bằng camera trong app: trình duyệt không ghi thông số, nhưng có góc nghiêng đo bằng cảm biến
+    facts.push({ id: "live_capture", category: "settings", severity: "info", values: {} });
+    const tilt = meta.capture.tiltDeg;
+    if (tilt !== undefined) {
+      const abs = Math.abs(tilt);
+      if (abs < 1) facts.push({ id: "capture_level", category: "composition", severity: "positive", values: { tilt: abs } });
+      else facts.push({ id: "capture_tilt", category: "composition", severity: abs >= 3 ? "medium" : "low", values: { tilt: abs } });
+    }
+  } else if (!meta.hasExif) facts.push({ id: "no_exif", category: "settings", severity: "info", values: {} });
 
   // --- Rung tay: tốc độ chậm hơn 1/(tiêu cự 35mm) với máy ảnh; điện thoại có chống rung nên ngưỡng 1/15s
   const t = meta.exposureTime;
@@ -114,6 +123,9 @@ export function describeFactForPrompt(f: Fact): string {
   const v = f.values;
   switch (f.id) {
     case "no_exif": return "No EXIF data (screenshot, edited or stripped). Do not guess camera settings.";
+    case "live_capture": return "Captured with the app's live camera in the browser: no EXIF settings are recorded (do not guess aperture/shutter/ISO). The browser cannot set aperture/shutter/ISO, so give tips the user can do (tap to focus, exposure slider, HDR, framing, light).";
+    case "capture_level": return `Phone sensor measured the camera tilt at capture: ${v.tilt}° → the frame was held level.`;
+    case "capture_tilt": return `Phone sensor measured the camera tilt at capture: ${v.tilt}° (camera roll, not necessarily the scene's horizon).`;
     case "shake_risk": return `Shutter ${v.shutter} is slower than the safe handheld speed ${v.safeShutter} → risk of camera shake/motion blur.`;
     case "high_iso": return `ISO ${v.iso} is high → visible noise likely.`;
     case "wide_aperture": return `Wide aperture f/${v.f} → shallow depth of field.`;

@@ -1,12 +1,12 @@
 # Kế hoạch: App Hướng Dẫn Chụp Ảnh (photo-coach)
 
-## 0. Trạng thái (cập nhật 2026-10-17)
+## 0. Trạng thái (cập nhật 2026-10-18)
 
 | Phase | Trạng thái |
 |---|---|
 | Phase 0 | Công cụ + hướng dẫn xong (`docs/PHASE0-SETUP.md`, `tools/setup-check`). Đã có: Neon, Gemini. **Còn thiếu: Google OAuth, Oracle + spike CORS** |
 | Phase 1 | **Code xong + test xong** (57 unit/integration, E2E desktop + mobile với Gemini thật). Còn: deploy Vercel (`docs/PHASE1-DEPLOY.md`) — cần Google OAuth + Oracle trước |
-| Phase 2 | Chưa bắt đầu |
+| Phase 2 | **2A xong** (2026-10-18): trang `/camera` — camera trực tiếp, lưới bố cục, khung tỉ lệ, thước cân bằng, cảnh báo sáng/tối, bù sáng (máy hỗ trợ), chụp → phân tích; PWA manifest + icon. Test E2E bằng camera giả. **Chưa test trên điện thoại thật.** Còn 2B (MediaPipe người/mặt, chế độ thể loại) và 2C (MediaPipe + đo chân trời cho ảnh upload) |
 | Phase 3 | **Trình chỉnh sửa ảnh xong** (2026-10-18): xoá vật thể (MI-GAN trên trình duyệt), cắt & xoay, màu & sáng, "Áp dụng gợi ý AI", tải ảnh về. Phần còn lại của Phase 3 chưa làm |
 
 ### Khác so với kế hoạch ban đầu (và lý do)
@@ -207,6 +207,16 @@ Mục tiêu: mở camera trên điện thoại, app hướng dẫn **real-time t
 | Hiệu năng & pin | Giảm fps khi máy nóng/tab ẩn (`visibilitychange`), chỉ load model MediaPipe khi vào chế độ có người |
 
 Giới hạn cần nói rõ với người dùng: trình duyệt **không điều khiển được khẩu độ/tốc độ/ISO thật** của camera điện thoại (chỉ một số máy Android hỗ trợ `exposureCompensation`, `torch`, `zoom` qua `MediaStreamTrack.applyConstraints`). → App hướng dẫn **cách cầm/đặt máy/ánh sáng**, còn thông số chỉ gợi ý (vd “chạm vào mặt để lấy nét, kéo thanh phơi sáng xuống”).
+
+#### Chia nhỏ & điều chỉnh khi làm (2026-10-18)
+- **2A — xong**: `/camera`, lưới (1/3, tỉ lệ vàng, chéo, tâm), khung 4:5 / 1:1 / 9:16 / 3:2 (**cắt luôn khi chụp**, không chỉ vẽ mask), thước cân bằng, cảnh báo sáng/tối, thanh bù sáng khi camera hỗ trợ `exposureCompensation`, nút "Dùng camera gốc" (`<input capture>`), manifest + icon (vẽ bằng `next/og`).
+- **Không dùng Serwist/service worker**: Chrome & iOS đã cho cài PWA chỉ cần manifest; app cần mạng để phân tích nên offline không có ích. Thêm sau nếu cần push notification.
+- **Đo frame trên main thread** (frame 160px, ~1ms) thay vì Web Worker — giống quyết định Phase 1.
+- **Thước cân bằng tính từ véc-tơ trọng lực** (beta/gamma → góc xoay quanh trục nhìn, trừ `screen.orientation.angle`) thay vì đọc thẳng gamma — đúng cả khi cầm dọc lẫn ngang. Không chặn theo kết quả xin quyền (Chrome trả "prompt" mà vẫn gửi dữ liệu); có dữ liệu thì hiện.
+- **Ảnh chụp trong app không có EXIF** → thay fact `no_exif` bằng `live_capture`, gửi kèm góc nghiêng lúc bấm chụp (`raw.capture`) → fact `capture_level` / `capture_tilt` và AI biết không được đoán thông số. `PROMPT_VERSION` = 2026-10-18.1.
+- `ImageCapture.takePhoto()` chỉ dùng khi ảnh cùng hướng và lớn hơn frame video (một số máy Android trả ảnh chưa xoay); ngược lại lấy frame video.
+- **2B — tiếp theo**: MediaPipe FaceDetector + PoseLandmarker (lazy-load), quy tắc vị trí người, chế độ Chân dung / Phong cảnh (bỏ Đồ ăn / Sản phẩm cho tới khi cần).
+- **2C**: MediaPipe cho ảnh upload; đo chân trời bằng Hough **tự viết bằng TypeScript** trên ảnh 800px (thay OpenCV.js ~8MB).
 
 Cũng đưa vào Phase 2:
 - Bổ sung MediaPipe vào luồng **phân tích ảnh upload** để box người/mặt chính xác hơn, Gemini chỉ lo nhận xét.
