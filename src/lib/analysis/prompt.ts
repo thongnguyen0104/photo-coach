@@ -4,7 +4,7 @@ import { describeFactForPrompt } from "./facts";
 import type { Fact } from "./types";
 
 /** Tăng khi sửa prompt để so sánh chất lượng giữa các phiên bản. */
-export const PROMPT_VERSION = "2026-10-17.1";
+export const PROMPT_VERSION = "2026-10-18.1";
 
 export type Locale = "vi" | "en";
 export type Mode = "basic" | "advanced";

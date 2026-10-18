@@ -43,6 +43,28 @@ export interface NormalizedMetadata {
   description?: string;
   keywords?: string[];
   rating?: number;
+  /** Ảnh chụp bằng camera trực tiếp trong app (không có EXIF) */
+  capture?: CaptureInfo;
+}
+
+export interface CaptureInfo {
+  source: "live-camera";
+  /** Góc nghiêng đo bằng cảm biến lúc bấm chụp (độ) */
+  tiltDeg?: number;
+  aspect?: string;
+  mobile?: boolean;
+}
+
+/** Đọc thông tin chụp do app tự ghi vào raw.capture (dữ liệu từ client → kiểm tra từng trường). */
+function readCapture(seg: Seg): CaptureInfo | undefined {
+  if (!seg || seg.source !== "live-camera") return undefined;
+  const tilt = num(seg.tiltDeg);
+  return {
+    source: "live-camera",
+    tiltDeg: tilt !== undefined && Math.abs(tilt) <= 45 ? Math.round(tilt * 10) / 10 : undefined,
+    aspect: str(seg.aspect)?.slice(0, 8),
+    mobile: seg.mobile === true,
+  };
 }
 
 const PHONE_MAKES = [
@@ -133,9 +155,11 @@ export function normalizeMetadata(raw: Record<string, unknown> | null | undefine
   // Giá trị APEX dự phòng khi thiếu FNumber/ExposureTime
   const apertureApex = num(tag([exif], "ApertureValue"));
   const shutterApex = num(tag([exif], "ShutterSpeedValue"));
+  const capture = readCapture(r.capture);
+  const deviceType = detectDeviceType(make, model);
   const out: NormalizedMetadata = {
     hasExif: !!(exif || ifd0),
-    deviceType: detectDeviceType(make, model),
+    deviceType: deviceType === "unknown" && capture?.mobile ? "phone" : deviceType,
     make,
     model,
     lensModel: str(tag([exif, xmp], "LensModel", "Lens")),
@@ -173,6 +197,7 @@ export function normalizeMetadata(raw: Record<string, unknown> | null | undefine
     description: str(tag([ifd0, xmp, iptc], "ImageDescription", "description", "Caption")),
     keywords: Array.isArray(keywords) ? keywords.map(String) : typeof keywords === "string" ? [keywords] : undefined,
     rating: num(tag([xmp], "Rating")),
+    capture,
   };
 
   // Bỏ các key undefined cho gọn JSON
