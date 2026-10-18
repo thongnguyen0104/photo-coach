@@ -13,6 +13,8 @@ export interface Storage {
   /** URL xem/tải file có hạn dùng. */
   presignGet(key: string, expiresInSec?: number): Promise<string>;
   getBytes(key: string): Promise<Uint8Array>;
+  /** Dung lượng thật của file đã upload (byte); null nếu chưa có file. */
+  size(key: string): Promise<number | null>;
   delete(key: string): Promise<void>;
 }
 

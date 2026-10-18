@@ -29,6 +29,20 @@ export async function consumeQuota(db: Db, userId: string, limit: number, day = 
   return rows.length > 0;
 }
 
+/** Đếm 1 lần tạo ảnh mới (nguyên tử). Trả false nếu đã tải quá nhiều ảnh hôm nay. */
+export async function consumeUpload(db: Db, userId: string, limit: number, day = vnDay()): Promise<boolean> {
+  const rows = await db
+    .insert(usageQuota)
+    .values({ userId, day, count: 0, uploads: 1 })
+    .onConflictDoUpdate({
+      target: [usageQuota.userId, usageQuota.day],
+      set: { uploads: sql`${usageQuota.uploads} + 1` },
+      setWhere: sql`${usageQuota.uploads} < ${limit}`,
+    })
+    .returning({ uploads: usageQuota.uploads });
+  return rows.length > 0;
+}
+
 /** Hoàn lại 1 lượt khi phân tích lỗi (không phải lỗi của người dùng). */
 export async function refundQuota(db: Db, userId: string, day = vnDay()): Promise<void> {
   await db

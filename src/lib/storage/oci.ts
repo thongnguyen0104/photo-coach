@@ -1,5 +1,5 @@
 import "server-only";
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Storage } from "./index";
 
@@ -34,6 +34,15 @@ export function createOciStorage(): Storage {
     async getBytes(key) {
       const res = await s3.send(new GetObjectCommand({ Bucket, Key: key }));
       return res.Body!.transformToByteArray();
+    },
+    async size(key) {
+      try {
+        const res = await s3.send(new HeadObjectCommand({ Bucket, Key: key }));
+        return res.ContentLength ?? null;
+      } catch (err) {
+        if ((err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404) return null;
+        throw err;
+      }
     },
     async delete(key) {
       await s3.send(new DeleteObjectCommand({ Bucket, Key: key }));

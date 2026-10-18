@@ -1,11 +1,11 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, notExists, sql } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { analyses, photoMetadata, photos } from "@/lib/db/schema";
 import type { UploadRequest, UploadResponse } from "@/lib/api-schemas";
 import { normalizeMetadata, stripGps, type RawMetadata } from "@/lib/image/metadata";
 import { photoKeys, type Storage } from "@/lib/storage";
 import { AppError } from "./errors";
-import { getUsage } from "./quota";
+import { consumeUpload, getUsage } from "./quota";
 
 const MAX_RAW_JSON = 300_000;
 
@@ -20,8 +20,39 @@ function capRaw(raw: RawMetadata): RawMetadata | null {
   return JSON.stringify(out).length <= MAX_RAW_JSON ? out : null;
 }
 
+const ORPHAN_AGE_MS = 60 * 60 * 1000;
+
+/**
+ * Ảnh đã tạo quá 1 giờ mà chưa từng phân tích thành công (upload dở, AI lỗi, bỏ ngang…)
+ * không hiện trong Lịch sử nên người dùng không xoá được → tự dọn.
+ */
+export async function cleanupOrphans(deps: { db: Db; storage: Storage }, userId: string, olderThanMs = ORPHAN_AGE_MS) {
+  const { db, storage } = deps;
+  const orphans = await db
+    .select({ id: photos.id, originalKey: photos.originalKey, previewKey: photos.previewKey })
+    .from(photos)
+    .where(
+      and(
+        eq(photos.userId, userId),
+        // So bằng giờ của DB (cột created_at do DB tự ghi) → không lệch múi giờ
+        lt(photos.createdAt, sql`now() - ${olderThanMs} * interval '1 millisecond'`),
+        notExists(
+          db
+            .select({ one: sql`1` })
+            .from(analyses)
+            .where(and(eq(analyses.photoId, photos.id), inArray(analyses.status, ["done", "pending"]))),
+        ),
+      ),
+    )
+    .limit(20);
+  if (orphans.length === 0) return 0;
+  await Promise.allSettled(orphans.flatMap((o) => [storage.delete(o.originalKey), storage.delete(o.previewKey)]));
+  await db.delete(photos).where(and(eq(photos.userId, userId), inArray(photos.id, orphans.map((o) => o.id))));
+  return orphans.length;
+}
+
 export async function createPhotoUpload(
-  deps: { db: Db; storage: Storage; dailyQuota: number },
+  deps: { db: Db; storage: Storage; dailyQuota: number; dailyUploads?: number },
   userId: string,
   input: UploadRequest,
 ): Promise<UploadResponse> {
@@ -38,6 +69,8 @@ export async function createPhotoUpload(
   if (dup) return { photoId: dup.id, duplicate: true };
 
   if ((await getUsage(db, userId)) >= deps.dailyQuota) throw new AppError("quota_exceeded");
+  if (!(await consumeUpload(db, userId, deps.dailyUploads ?? deps.dailyQuota * 3))) throw new AppError("too_many_uploads");
+  await cleanupOrphans(deps, userId);
 
   const raw = (input.rawMetadata ?? {}) as RawMetadata;
   const normalized = normalizeMetadata(raw);

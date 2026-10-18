@@ -87,7 +87,9 @@
     "upload_failed": "Tải ảnh lên thất bại. Kiểm tra mạng rồi thử lại.",
     "ai_rate_limited": "AI đang quá tải (giới hạn gói miễn phí). Thử lại sau ít phút.",
     "ai_failed": "AI chưa phân tích được ảnh này. Thử lại nhé.",
-    "server_error": "Có lỗi xảy ra. Thử lại sau."
+    "server_error": "Có lỗi xảy ra. Thử lại sau.",
+    "upload_too_large": "File ảnh tải lên lớn hơn giới hạn cho phép (25MB). Hãy chọn ảnh khác.",
+    "too_many_uploads": "Bạn đã tải lên quá nhiều ảnh hôm nay. Quay lại vào ngày mai nhé!"
   },
   "result": {
     "overall": "Điểm tổng",
@@ -148,7 +150,8 @@
     },
     "otherLocale": "Nhận xét này được viết bằng {lang, select, en {tiếng Anh} other {tiếng Việt}}.",
     "reanalyzeLocale": "Viết lại bằng tiếng Việt",
-    "pending": "Ảnh đang được phân tích, tải lại trang sau vài giây."
+    "pending": "Ảnh đang được phân tích, trang sẽ tự cập nhật khi xong.",
+    "retry": "Phân tích lại"
   },
   "category": {
     "composition": "Bố cục",
@@ -229,7 +232,7 @@
     "title": "Quyền riêng tư",
     "items": [
       "Ảnh của bạn được lưu ở chế độ riêng tư (private). Chỉ bạn xem được, qua đường link có hạn dùng ngắn.",
-      "Vị trí GPS trong ảnh mặc định KHÔNG được lưu. Bạn có thể chọn lưu khi tải ảnh lên.",
+      "Vị trí GPS mặc định bị xoá khỏi ảnh ngay trên máy bạn, trước khi tải lên. Bạn có thể chọn giữ lại khi tải ảnh lên.",
       "Để phân tích, một bản thu nhỏ của ảnh (tối đa 1536px) được gửi tới Google Gemini. Ở gói miễn phí, Google có thể dùng dữ liệu này để cải thiện sản phẩm của họ.",
       "Bạn có thể xoá ảnh bất cứ lúc nào trong Lịch sử. Khi xoá, file ảnh và toàn bộ kết quả phân tích bị xoá vĩnh viễn.",
       "Chúng tôi chỉ dùng email, tên và ảnh đại diện từ tài khoản Google để đăng nhập."

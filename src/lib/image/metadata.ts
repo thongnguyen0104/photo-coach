@@ -251,6 +251,18 @@ export function stripGps(raw: RawMetadata): RawMetadata {
   return copy;
 }
 
+/** Metadata còn toạ độ GPS không (EXIF hoặc XMP)? */
+export function hasGps(raw: RawMetadata | null | undefined): boolean {
+  if (!raw) return false;
+  const gps = raw.gps as Record<string, unknown> | undefined;
+  if (gps && (Number.isFinite(gps.latitude) || gps.GPSLatitude != null)) return true;
+  const xmp = raw.xmp;
+  if (xmp && typeof xmp === "object" && !Array.isArray(xmp)) {
+    return Object.entries(xmp).some(([k, v]) => /^GPS(Latitude|Longitude)$/i.test(k) && String(v ?? "").trim() !== "");
+  }
+  return false;
+}
+
 /** Định dạng tốc độ màn trập: 0.004 → "1/250", 2 → "2s" */
 export function formatShutter(seconds?: number): string | undefined {
   if (!seconds || seconds <= 0) return undefined;

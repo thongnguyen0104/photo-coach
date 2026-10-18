@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     if (!parsed.success) throw new AppError("invalid_input", parsed.error.issues[0]?.message, parsed.error.issues.slice(0, 5));
 
     const result = await createPhotoUpload(
-      { db: await getDb(), storage: await getStorage(), dailyQuota: config.dailyQuota },
+      { db: await getDb(), storage: await getStorage(), dailyQuota: config.dailyQuota, dailyUploads: config.dailyUploads },
       userId,
       parsed.data,
     );

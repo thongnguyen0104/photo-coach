@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import exifr from "exifr";
 import { makeTestJpeg } from "../fixtures/test-photo";
 
 /**
@@ -55,6 +56,14 @@ test("upload → phân tích → kết quả → lịch sử → xoá", async ({
   await expect(exif).toContainText("f/1.8");
   await expect(exif).toContainText("tương đương 85mm");
   await expect(exif).toContainText("Không lưu (bạn chọn ẩn vị trí)");
+
+  // File gốc trên storage đã bị xoá GPS ngay trong trình duyệt, vẫn giữ EXIF máy ảnh
+  const originalHref = await page.locator("a[download]").first().getAttribute("href");
+  const original = await (await page.request.get(originalHref!)).body();
+  const stored = await exifr.parse(original, { gps: true, mergeOutput: true } as never);
+  expect(stored?.Make).toBe("Canon");
+  expect(stored?.latitude).toBeUndefined();
+  expect(await exifr.gps(original).catch(() => undefined)).toBeFalsy();
 
   // Hover marker ↔ thẻ nhận xét
   const firstMarker = page.getByTestId("marker").first();

@@ -19,6 +19,7 @@ export interface HistoryCard {
 
 export function HistoryGrid({ items, deletable = false }: { items: HistoryCard[]; deletable?: boolean }) {
   const t = useTranslations("result");
+  const tErr = useTranslations("errors");
   const format = useFormatter();
   const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -26,8 +27,13 @@ export function HistoryGrid({ items, deletable = false }: { items: HistoryCard[]
   async function remove(photoId: string) {
     if (!confirm(t("deleteConfirm"))) return;
     setDeleting(photoId);
-    await fetch(`/api/photos/${photoId}`, { method: "DELETE" });
+    const res = await fetch(`/api/photos/${photoId}`, { method: "DELETE" }).catch(() => null);
     setDeleting(null);
+    if (!res?.ok) {
+      const code = res ? ((await res.json().catch(() => ({}))).error ?? "server_error") : "upload_failed";
+      alert(tErr(code));
+      return;
+    }
     router.refresh();
   }
 
