@@ -11,10 +11,11 @@ import * as schema from "@/lib/db/schema";
 import type { Db } from "@/lib/db";
 import type { Storage } from "@/lib/storage";
 import type { UploadRequest } from "@/lib/api-schemas";
-import { createPhotoUpload, deletePhoto, listHistory } from "@/lib/server/photos";
-import { runAnalysis, type AiProvider } from "@/lib/server/analyze";
+import { cleanupOrphans, createPhotoUpload, deletePhoto, listHistory } from "@/lib/server/photos";
+import { expireStaleAnalysis, PENDING_TIMEOUT_MS, runAnalysis, type AiProvider } from "@/lib/server/analyze";
 import { getUsage } from "@/lib/server/quota";
-import { AppError } from "@/lib/server/errors";
+import { AppError, errorResponse, storedErrorCode } from "@/lib/server/errors";
+import { MAX_UPLOAD_BYTES } from "@/lib/api-schemas";
 import { signStorageUrl, verifyStorageSignature } from "@/lib/storage/signing";
 
 class MemoryStorage implements Storage {
@@ -30,6 +31,9 @@ class MemoryStorage implements Storage {
     const f = this.files.get(key);
     if (!f) throw new Error("missing");
     return f;
+  }
+  async size(key: string) {
+    return this.files.get(key)?.length ?? null;
   }
   async delete(key: string) {
     this.deleted.push(key);
@@ -102,6 +106,7 @@ async function uploadAndStore(sha: string, extra?: Partial<UploadRequest>) {
   const res = await createPhotoUpload({ db, storage, dailyQuota: 10 }, userId, upload(sha, extra));
   const [photo] = await db.select().from(schema.photos).where(eq(schema.photos.id, res.photoId));
   storage.files.set(photo.previewKey, new Uint8Array([1, 2, 3]));
+  storage.files.set(photo.originalKey, new Uint8Array([1, 2, 3, 4]));
   return res;
 }
 
@@ -170,7 +175,8 @@ describe("luồng upload → phân tích", () => {
     });
     const rows = await db.select().from(schema.analyses).where(eq(schema.analyses.photoId, photoId));
     expect(rows[0].status).toBe("failed");
-    expect(rows[0].error).toBe("boom");
+    expect(rows[0].error).toBe("ai_failed: boom");
+    expect(storedErrorCode(rows[0].error)).toBe("ai_failed");
     expect(await getUsage(db, userId)).toBe(0);
   });
 
@@ -198,6 +204,63 @@ describe("luồng upload → phân tích", () => {
     expect(storage.deleted).toHaveLength(2);
     expect(await listHistory(db, userId)).toEqual([]);
     expect(await db.select().from(schema.analyses)).toHaveLength(0);
+  });
+
+  it("file thật trên storage quá lớn → xoá ảnh, báo upload_too_large, không tốn lượt", async () => {
+    const { photoId } = await uploadAndStore("7");
+    const [photo] = await db.select().from(schema.photos).where(eq(schema.photos.id, photoId));
+    storage.files.set(photo.originalKey, new Uint8Array(MAX_UPLOAD_BYTES + 1));
+    await expect(runAnalysis({ db, storage, ai: mockAi, dailyQuota: 10 }, userId, { photoId, locale: "vi", mode: "basic" })).rejects.toMatchObject({
+      code: "upload_too_large",
+    });
+    expect(await db.select().from(schema.photos)).toHaveLength(0);
+    expect(storage.files.size).toBe(0);
+    expect(await getUsage(db, userId)).toBe(0);
+  });
+
+  it("giới hạn số ảnh mới mỗi ngày", async () => {
+    const deps = { db, storage, dailyQuota: 10, dailyUploads: 2 };
+    await createPhotoUpload(deps, userId, upload("8"));
+    await createPhotoUpload(deps, userId, upload("9"));
+    await expect(createPhotoUpload(deps, userId, upload("a1"))).rejects.toMatchObject({ code: "too_many_uploads" });
+  });
+
+  it("dọn ảnh mồ côi (quá 1 giờ chưa phân tích xong), giữ ảnh đã phân tích", async () => {
+    const kept = await uploadAndStore("b1");
+    await runAnalysis({ db, storage, ai: mockAi, dailyQuota: 10 }, userId, { photoId: kept.photoId, locale: "vi", mode: "basic" });
+    const orphan = await uploadAndStore("b2");
+    const failed = await uploadAndStore("b3");
+    await runAnalysis({ db, storage, ai: failingAi, dailyQuota: 10 }, userId, { photoId: failed.photoId, locale: "vi", mode: "basic" }).catch(() => {});
+
+    expect(await cleanupOrphans({ db, storage }, userId)).toBe(0); // còn mới → chưa dọn
+    expect(await cleanupOrphans({ db, storage }, userId, -60_000)).toBe(2); // giả lập "đã quá hạn"
+    const left = await db.select({ id: schema.photos.id }).from(schema.photos);
+    expect(left.map((r) => r.id)).toEqual([kept.photoId]);
+    expect(storage.deleted).toHaveLength(4);
+    expect(orphan.photoId).toBeDefined();
+  });
+
+  it("bản ghi pending bị treo → chuyển failed và hoàn lượt (chỉ 1 lần)", async () => {
+    const { photoId } = await uploadAndStore("c1");
+    const never: AiProvider = { name: "gemini", model: "x", run: () => new Promise(() => {}) };
+    void runAnalysis({ db, storage, ai: never, dailyQuota: 10 }, userId, { photoId, locale: "vi", mode: "basic" });
+    await new Promise((r) => setTimeout(r, 50));
+    const [row] = await db.select().from(schema.analyses).where(eq(schema.analyses.photoId, photoId));
+    expect(row.status).toBe("pending");
+    expect(await getUsage(db, userId)).toBe(1);
+
+    expect(await expireStaleAnalysis(db, row.id)).toBe(false); // chưa quá hạn
+    expect(PENDING_TIMEOUT_MS).toBeGreaterThan(60_000);
+    expect(await expireStaleAnalysis(db, row.id, -60_000)).toBe(true);
+    expect(await expireStaleAnalysis(db, row.id, -60_000)).toBe(false);
+    const [after] = await db.select().from(schema.analyses).where(eq(schema.analyses.id, row.id));
+    expect(after.status).toBe("failed");
+    expect(await getUsage(db, userId)).toBe(0);
+  });
+
+  it("không gửi chi tiết lỗi của AI cho người dùng", async () => {
+    const res = errorResponse(new AppError("ai_failed", "Gemini 500: internal key=abc"));
+    expect(await res.json()).toEqual({ error: "ai_failed", message: "ai_failed" });
   });
 });
 

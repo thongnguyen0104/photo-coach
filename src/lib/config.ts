@@ -56,6 +56,11 @@ export const config = {
     const n = Number(process.env.DAILY_QUOTA);
     return Number.isFinite(n) && n > 0 ? Math.floor(n) : 10;
   },
+  /** Số ảnh mới được tải lên mỗi ngày (mặc định gấp 3 lượt phân tích). */
+  get dailyUploads() {
+    const n = Number(process.env.DAILY_UPLOAD_LIMIT);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : this.dailyQuota * 3;
+  },
 };
 
 /** Danh sách các thành phần đang chạy ở chế độ local — hiện banner nhắc người dùng. */

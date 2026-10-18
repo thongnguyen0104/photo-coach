@@ -32,6 +32,10 @@ export function createLocalStorage(): Storage {
     async getBytes(key) {
       return new Uint8Array(await fs.readFile(/*turbopackIgnore: true*/ localPath(key)));
     },
+    async size(key) {
+      const st = await fs.stat(/*turbopackIgnore: true*/ localPath(key)).catch(() => null);
+      return st ? st.size : null;
+    },
     async delete(key) {
       await fs.rm(/*turbopackIgnore: true*/ localPath(key), { force: true });
     },

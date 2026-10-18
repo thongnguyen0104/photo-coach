@@ -143,7 +143,7 @@ export const analyses = pgTable(
     error: text("error"),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (t) => [index("analyses_photo_idx").on(t.photoId, t.createdAt)],
+  (t) => [index("analyses_photo_idx").on(t.photoId, t.createdAt), index("analyses_user_created_idx").on(t.userId, t.createdAt)],
 );
 
 export const usageQuota = pgTable(
@@ -154,6 +154,8 @@ export const usageQuota = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     day: date("day", { mode: "string" }).notNull(),
     count: integer("count").notNull().default(0),
+    /** Số lần tạo ảnh mới trong ngày (chặn spam upload) */
+    uploads: integer("uploads").notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.userId, t.day] })],
 );

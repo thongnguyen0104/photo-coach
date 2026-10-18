@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, Languages, Loader2, RefreshCw, Trash2, Upload, Wand2 } from "lucide-react";
+import { Download, Languages, Loader2, RefreshCw, RotateCcw, Trash2, Upload, Wand2 } from "lucide-react";
 import Link from "next/link";
 
 export interface AnalysisActionsProps {
@@ -13,9 +13,11 @@ export interface AnalysisActionsProps {
   analysisLocale: string;
   originalUrl: string;
   fileName: string;
+  /** Trạng thái lần phân tích (mặc định: đã xong) */
+  status?: "done" | "pending" | "failed";
 }
 
-export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, originalUrl, fileName }: AnalysisActionsProps) {
+export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, originalUrl, fileName, status = "done" }: AnalysisActionsProps) {
   const t = useTranslations("result");
   const tEdit = useTranslations("editor");
   const tErr = useTranslations("errors");
@@ -27,17 +29,19 @@ export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, ori
   async function reanalyze(nextMode: "basic" | "advanced", key: string) {
     setBusy(key);
     setError(null);
-    const res = await fetch("/api/analyses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photoId, locale, mode: nextMode }),
-    });
-    const json = await res.json().catch(() => ({}));
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/analyses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoId, locale, mode: nextMode }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "server_error");
       router.push(`/analyze/${json.analysisId}`);
       router.refresh();
-    } else {
-      setError(json.error ?? "server_error");
+    } catch (err) {
+      // Mất mạng → fetch ném TypeError, không có mã lỗi
+      setError(err instanceof TypeError ? "upload_failed" : (err as Error).message);
       setBusy(null);
     }
   }
@@ -45,7 +49,13 @@ export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, ori
   async function remove() {
     if (!confirm(t("deleteConfirm"))) return;
     setBusy("delete");
-    await fetch(`/api/photos/${photoId}`, { method: "DELETE" });
+    setError(null);
+    const res = await fetch(`/api/photos/${photoId}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) {
+      setError(res ? ((await res.json().catch(() => ({}))).error ?? "server_error") : "upload_failed");
+      setBusy(null);
+      return;
+    }
     router.push("/history");
     router.refresh();
   }
@@ -66,10 +76,18 @@ export function AnalysisActions({ analysisId, photoId, mode, analysisLocale, ori
         </div>
       )}
       <div className="flex flex-wrap gap-2">
-        <Link href={`/analyze/${analysisId}/edit`} className="btn btn-primary">
-          <Wand2 className="size-4" aria-hidden />
-          {tEdit("open")}
-        </Link>
+        {status === "done" && (
+          <Link href={`/analyze/${analysisId}/edit`} className="btn btn-primary">
+            <Wand2 className="size-4" aria-hidden />
+            {tEdit("open")}
+          </Link>
+        )}
+        {status === "failed" && (
+          <button type="button" className="btn btn-primary" disabled={!!busy} onClick={() => reanalyze(mode, "retry")}>
+            {spin("retry", RotateCcw)}
+            {t("retry")}
+          </button>
+        )}
         <Link href="/" className="btn btn-ghost">
           <Upload className="size-4" aria-hidden />
           {t("back")}

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
 import { Camera, Download, ImageUp, Loader2, MapPin, RotateCcw, Sparkles } from "lucide-react";
-import { prepareImage, PrepareError, uploadWithProgress, type PreparedImage } from "@/lib/image/prepare";
-import { cameraName, formatBytes, formatShutter, normalizeMetadata, type CaptureInfo, type RawMetadata } from "@/lib/image/metadata";
+import { prepareImage, PrepareError, removeGps, uploadWithProgress, type PreparedImage } from "@/lib/image/prepare";
+import { cameraName, formatBytes, formatShutter, hasGps, normalizeMetadata, type CaptureInfo, type RawMetadata } from "@/lib/image/metadata";
 import type { AnalysisResponse, ApiErrorCode, UploadResponse } from "@/lib/api-schemas";
 
 type Mode = "basic" | "advanced";
@@ -39,10 +39,13 @@ async function uploadAndAnalyze(
   onProgress: (percent: number) => void,
   onAnalyzing: () => void,
 ): Promise<string> {
+  // Không đồng ý lưu vị trí → xoá GPS khỏi chính file gốc trước khi rời máy
+  const original = !opts.saveGps && hasGps(img.rawMetadata) ? await removeGps(img.file, img.mime) : { file: img.file, mime: img.mime };
+
   const created = await postJson<UploadResponse>("/api/uploads", {
-    fileName: img.file.name.slice(0, 200) || "photo",
-    mime: img.mime,
-    size: img.file.size,
+    fileName: original.file.name.slice(0, 200) || "photo",
+    mime: original.mime,
+    size: original.file.size,
     width: img.width,
     height: img.height,
     previewWidth: img.previewWidth,
@@ -55,7 +58,7 @@ async function uploadAndAnalyze(
   });
 
   if (!created.duplicate && created.uploads) {
-    const total = img.file.size + img.preview.size;
+    const total = original.file.size + img.preview.size;
     let previewDone = 0;
     try {
       // Preview trước (nhỏ, cần cho AI), rồi tới ảnh gốc
@@ -63,7 +66,7 @@ async function uploadAndAnalyze(
         previewDone = n;
         onProgress(Math.round((n / total) * 100));
       });
-      await uploadWithProgress(created.uploads.original.url, img.file, created.uploads.original.headers, (n) =>
+      await uploadWithProgress(created.uploads.original.url, original.file, created.uploads.original.headers, (n) =>
         onProgress(Math.round(((previewDone + n) / total) * 100)),
       );
     } catch {

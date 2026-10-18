@@ -1,8 +1,9 @@
 "use client";
 
 import { ACCEPTED_MIME, MAX_UPLOAD_BYTES } from "@/lib/api-schemas";
-import { normalizeMetadata, sanitizeForJson, type NormalizedMetadata, type RawMetadata } from "./metadata";
+import { hasGps, normalizeMetadata, sanitizeForJson, type NormalizedMetadata, type RawMetadata } from "./metadata";
 import { computeImageStats, type ImageStats } from "./stats";
+import { scrubGpsInPlace } from "./strip-gps";
 
 export const PREVIEW_MAX_EDGE = 1536;
 const STATS_MAX_EDGE = 800;
@@ -172,6 +173,30 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   };
   bmp.close();
   return result;
+}
+
+/**
+ * Bỏ vị trí GPS khỏi file gốc trước khi tải lên.
+ * Cách 1: xoá ngay trong file (giữ chất lượng và EXIF khác) rồi đọc lại để kiểm tra.
+ * Cách 2 (nếu vẫn còn GPS, vd XMP bị nén): vẽ lại ảnh → file mới không còn metadata nào.
+ */
+export async function removeGps(file: File, mime: AcceptedMime): Promise<{ file: File; mime: AcceptedMime }> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  scrubGpsInPlace(bytes);
+  const scrubbed = new File([bytes], file.name, { type: file.type || mime });
+  if (!hasGps(await readRawMetadata(scrubbed))) return { file: scrubbed, mime };
+
+  const bmp = await createImageBitmap(await toDisplayBlob(file, mime));
+  // Safari giới hạn canvas ~16,7 MP → thu nhỏ nếu ảnh lớn hơn
+  const fit = Math.min(1, Math.sqrt(16_000_000 / (bmp.width * bmp.height)));
+  const { canvas } = drawScaled(bmp, Math.floor(Math.max(bmp.width, bmp.height) * fit));
+  bmp.close();
+  const outMime: AcceptedMime = mime === "image/png" ? "image/png" : "image/jpeg";
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new PrepareError("decode_failed"))), outMime, 0.95),
+  );
+  const name = outMime === mime ? file.name : file.name.replace(/\.\w+$/, "") + ".jpg";
+  return { file: new File([blob], name, { type: outMime }), mime: outMime };
 }
 
 /** Upload bằng XHR để có % tiến trình (fetch chưa hỗ trợ upload progress). */

@@ -87,7 +87,9 @@
     "upload_failed": "Upload failed. Check your connection and try again.",
     "ai_rate_limited": "The AI is busy (free-tier limit). Try again in a few minutes.",
     "ai_failed": "The AI couldn't analyze this photo. Please try again.",
-    "server_error": "Something went wrong. Please try again later."
+    "server_error": "Something went wrong. Please try again later.",
+    "upload_too_large": "The uploaded file is over the size limit (25MB). Please choose another photo.",
+    "too_many_uploads": "You've uploaded too many photos today. See you tomorrow!"
   },
   "result": {
     "overall": "Overall",
@@ -148,7 +150,8 @@
     },
     "otherLocale": "This feedback is written in {lang, select, en {English} other {Vietnamese}}.",
     "reanalyzeLocale": "Rewrite in English",
-    "pending": "This photo is still being analyzed, reload in a few seconds."
+    "pending": "This photo is still being analyzed. This page will update when it's done.",
+    "retry": "Analyze again"
   },
   "category": {
     "composition": "Composition",
@@ -229,7 +232,7 @@
     "title": "Privacy",
     "items": [
       "Your photos are stored privately. Only you can view them, through short-lived links.",
-      "GPS location is NOT saved by default. You can choose to keep it when uploading.",
+      "By default, GPS location is removed from the photo on your device, before it is uploaded. You can choose to keep it when uploading.",
       "To analyze, a downscaled copy (max 1536px) is sent to Google Gemini. On the free tier, Google may use this data to improve its products.",
       "You can delete a photo at any time from History. Deleting removes the file and all analyses permanently.",
       "We only use your Google account's email, name and avatar to sign you in."

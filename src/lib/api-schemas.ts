@@ -60,6 +60,8 @@ export type ApiErrorCode =
   | "not_found"
   | "quota_exceeded"
   | "upload_missing"
+  | "upload_too_large"
+  | "too_many_uploads"
   | "ai_rate_limited"
   | "ai_failed"
   | "server_error";

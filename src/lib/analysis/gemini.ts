@@ -22,6 +22,10 @@ export function toGeminiSchema(node: unknown): unknown {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+const DEFAULT_TIMEOUT_MS = 50_000;
+/** Còn ít hơn chừng này thì không gọi thêm (một lần gọi thường mất 8–20 giây) */
+const MIN_CALL_MS = 5_000;
+
 const responseJsonSchema = toGeminiSchema(z.toJSONSchema(aiOutputSchema));
 
 export interface AiCallResult {
@@ -34,7 +38,7 @@ export interface AiCallResult {
 export class AiError extends Error {
   constructor(
     message: string,
-    readonly code: "rate_limited" | "invalid_output" | "provider_error",
+    readonly code: "rate_limited" | "invalid_output" | "provider_error" | "timeout",
   ) {
     super(message);
   }
@@ -46,15 +50,20 @@ export async function analyzeWithGemini(params: {
   mimeType: string;
   systemInstruction: string;
   userPrompt: string;
+  /** Tổng thời gian tối đa cho mọi lần gọi + thử lại (hàm server chỉ chạy được 60 giây) */
+  timeoutMs?: number;
 }): Promise<AiCallResult> {
   const ai = getClient();
+  const deadline = Date.now() + (params.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  const remaining = () => deadline - Date.now();
   const imagePart = { inlineData: { mimeType: params.mimeType, data: Buffer.from(params.image).toString("base64") } };
   let extra = "";
   let inputTokens = 0;
   let outputTokens = 0;
 
-  const call = () =>
-    ai.models.generateContent({
+  const call = () => {
+    if (remaining() < MIN_CALL_MS) throw new AiError("Hết thời gian chờ AI", "timeout");
+    return ai.models.generateContent({
       model: params.model,
       contents: [{ role: "user", parts: [imagePart, { text: params.userPrompt + extra }] }],
       config: {
@@ -62,8 +71,10 @@ export async function analyzeWithGemini(params: {
         responseMimeType: "application/json",
         responseJsonSchema,
         temperature: 0.4,
+        abortSignal: AbortSignal.timeout(remaining()),
       },
     });
+  };
 
   // Thử tối đa 2 lần: lần 2 kèm lỗi validate để AI tự sửa
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -75,7 +86,7 @@ export async function analyzeWithGemini(params: {
         res = await call();
       } catch (err) {
         // 503 "high demand" thường chỉ thoáng qua → đợi chút rồi thử lại 1 lần
-        if (!/\b503\b|UNAVAILABLE|overloaded|high demand/i.test(String(err))) throw err;
+        if (!/\b503\b|UNAVAILABLE|overloaded|high demand/i.test(String(err)) || remaining() < MIN_CALL_MS + 2000) throw err;
         await sleep(2000);
         res = await call();
       }
@@ -84,6 +95,8 @@ export async function analyzeWithGemini(params: {
       inputTokens += res.usageMetadata?.promptTokenCount ?? 0;
       outputTokens += res.usageMetadata?.candidatesTokenCount ?? 0;
     } catch (err) {
+      if (err instanceof AiError) throw err;
+      if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) throw new AiError("Hết thời gian chờ AI", "timeout");
       const msg = err instanceof Error ? err.message : String(err);
       if (/\b(429|503)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|quota|high demand/i.test(msg)) throw new AiError(msg, "rate_limited");
       throw new AiError(msg, "provider_error");
