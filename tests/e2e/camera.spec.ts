@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import type { PersonObservation } from "../../src/lib/camera/subject";
+import { fakePose } from "../fixtures/fake-pose";
 
 /**
  * Phase 2 — chụp với hướng dẫn trực tiếp, dùng camera giả của Chromium (video mẫu 640×480).
@@ -97,4 +99,83 @@ test("camera trực tiếp → chụp → phân tích → xoá", async ({ page }
 
   const real = consoleErrors.filter((e) => !/404|Failed to load resource/.test(e));
   expect(real, real.join("\n")).toEqual([]);
+});
+
+/** Đăng nhập dev → mở /camera → bật camera, trả về kích thước video. */
+async function openLiveCamera(page: Page, name: string) {
+  await page.context().addCookies([{ name: "NEXT_LOCALE", value: "vi", url: "http://localhost:3000" }]);
+  await page.goto("/");
+  await page.getByLabel("Tên hiển thị").fill(name);
+  await page.getByRole("button", { name: "Vào thử" }).click();
+  // Nút mở camera chỉ hiện khi đã đăng nhập xong
+  await page.getByTestId("open-camera").click();
+  await page.waitForURL(/\/camera$/);
+  await page.getByTestId("start-camera").click();
+  await expect(page.getByTestId("camera-live")).toBeVisible();
+  await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+  await expect.poll(() => page.getByTestId("camera-video").evaluate((v: HTMLVideoElement) => v.videoWidth)).toBeGreaterThan(0);
+  return page.getByTestId("camera-video").evaluate((v: HTMLVideoElement) => ({ vw: v.videoWidth, vh: v.videoHeight }));
+}
+
+test("chế độ Chân dung: nhắc vị trí người (bộ nhận diện giả)", async ({ page }, testInfo) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
+  page.on("pageerror", (e) => consoleErrors.push(e.message));
+  const shot = (name: string) => SHOTS && page.screenshot({ path: `${SHOTS}/${testInfo.project.name}-subject-${name}.png`, caret: "initial" });
+
+  // Bộ nhận diện giả (chỉ có ở dev): trả về đúng những người gán vào biến này
+  await page.addInitScript(() => {
+    window.__PHOTO_COACH_FAKE_PEOPLE__ = [];
+  });
+  const { vw, vh } = await openLiveCamera(page, `E2E subject ${testInfo.project.name}`);
+  const setPeople = (people: PersonObservation[]) => page.evaluate((p) => (window.__PHOTO_COACH_FAKE_PEOPLE__ = p), people);
+  const person = (eyes: { x: number; y: number }, head: number, facing: -1 | 0 | 1 = 0) => fakePose({ vw, vh, eyes, head, facing });
+
+  await expect(page.getByTestId("mode-toggle")).toContainText("Chân dung");
+  await expect(page.getByTestId("subject-status")).toHaveText("Chưa thấy khuôn mặt nào trong khung");
+
+  // Mắt quá thấp → nhắc hướng máy xuống, có điểm đích ở 1/3 trên
+  await setPeople([person({ x: 0.5, y: 0.5 }, 0.12)]);
+  await expect(page.getByTestId("subject-hint")).toHaveText("Đưa mắt lên gần đường 1/3 trên — hướng máy xuống một chút");
+  await expect(page.getByTestId("eye-target")).toBeVisible();
+  await shot("01-eyes-low");
+
+  // Khung cắt ngang đầu gối → nhắc lùi lại, đánh dấu đỏ chỗ cắt
+  await setPeople([person({ x: 0.5, y: 0.2 }, 0.15)]);
+  await expect(page.getByTestId("subject-hint")).toContainText("Khung đang cắt ngang đầu gối — lùi lại");
+  await expect(page.getByTestId("cut-marker")).toBeVisible();
+  await shot("02-cut-knee");
+
+  // Nhìn sang phải mà đứng sát phải → chừa khoảng trống
+  await setPeople([person({ x: 0.7, y: 0.33 }, 0.15, 1)]);
+  await expect(page.getByTestId("subject-hint")).toHaveText("Chừa khoảng trống phía người đang nhìn — xoay máy sang phải");
+
+  // Đúng vị trí → khen
+  await setPeople([person({ x: 0.5, y: 0.33 }, 0.15)]);
+  await expect(page.getByTestId("subject-hint")).toHaveText("Bố cục đẹp — bấm chụp thôi!");
+  await shot("03-good");
+
+  // Đổi chế độ → tắt nhận diện người
+  await page.getByTestId("mode-toggle").click();
+  await expect(page.getByTestId("mode-toggle")).toContainText("Phong cảnh");
+  await expect(page.getByTestId("subject-overlay")).toHaveCount(0);
+  await expect(page.getByTestId("subject-hint")).toHaveCount(0);
+  await page.getByTestId("mode-toggle").click();
+  await expect(page.getByTestId("mode-toggle")).toContainText("Tự do");
+
+  // Chế độ được nhớ cho lần sau
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("photo-coach:camera") ?? "{}").mode)).toBe("free");
+
+  const real = consoleErrors.filter((e) => !/404|Failed to load resource/.test(e));
+  expect(real, real.join("\n")).toEqual([]);
+});
+
+test("chế độ Chân dung: tải MediaPipe thật và chạy trên camera", async ({ page }, testInfo) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (e) => pageErrors.push(e.message));
+  await openLiveCamera(page, `E2E mediapipe ${testInfo.project.name}`);
+
+  // Camera giả của Chromium không có người → tải xong model thì báo chưa thấy ai (không phải lỗi tải)
+  await expect(page.getByTestId("subject-status")).toHaveText("Chưa thấy khuôn mặt nào trong khung", { timeout: 90_000 });
+  expect(pageErrors).toEqual([]);
 });

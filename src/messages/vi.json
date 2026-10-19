@@ -234,6 +234,7 @@
       "Ảnh của bạn được lưu ở chế độ riêng tư (private). Chỉ bạn xem được, qua đường link có hạn dùng ngắn.",
       "Vị trí GPS mặc định bị xoá khỏi ảnh ngay trên máy bạn, trước khi tải lên. Bạn có thể chọn giữ lại khi tải ảnh lên.",
       "Để phân tích, một bản thu nhỏ của ảnh (tối đa 1536px) được gửi tới Google Gemini. Ở gói miễn phí, Google có thể dùng dữ liệu này để cải thiện sản phẩm của họ.",
+      "Khi chụp bằng camera trong app, việc nhận diện người, đo sáng và dò đường chân trời chạy ngay trên máy bạn. Hình từ camera không được gửi đi đâu cho tới khi bạn bấm Phân tích.",
       "Bạn có thể xoá ảnh bất cứ lúc nào trong Lịch sử. Khi xoá, file ảnh và toàn bộ kết quả phân tích bị xoá vĩnh viễn.",
       "Chúng tôi chỉ dùng email, tên và ảnh đại diện từ tài khoản Google để đăng nhập."
     ]
@@ -324,10 +325,12 @@
   },
   "camera": {
     "title": "Chụp với hướng dẫn",
-    "intro": "Mở camera ngay trong app. Trong lúc bạn ngắm, app hiện lưới bố cục, thước cân bằng và nhắc khi ảnh quá sáng hay quá tối. Chụp xong ảnh được chuyển thẳng sang bước phân tích.",
+    "intro": "Mở camera ngay trong app. Trong lúc bạn ngắm, app nhận ra người trong khung và chỉ cách dịch máy cho bố cục đẹp, hiện lưới bố cục, thước cân bằng và nhắc khi ảnh quá sáng hay quá tối. Chụp xong ảnh được chuyển thẳng sang bước phân tích.",
     "featureGrid": "Lưới bố cục: một phần ba, tỉ lệ vàng, đường chéo, tâm. Có khung 4:5, 1:1, 9:16, 3:2.",
     "featureLevel": "Thước cân bằng: chuyển xanh khi máy thẳng (lệch dưới 1°).",
     "featureLight": "Nhắc khi bị ngược sáng, trời cháy sáng hoặc thiếu sáng.",
+    "featureSubject": "Chế độ Chân dung: nhận ra người, nhắc chừa khoảng trống trên đầu, đặt mắt ở 1/3 trên, không cắt ngang khớp, chừa chỗ phía người đang nhìn. Chạy ngay trên máy, hình không gửi đi đâu (lần đầu tải khoảng 9MB).",
+    "featureLandscape": "Chế độ Phong cảnh: dò đường chân trời, nhắc khi nó cắt đôi khung hình.",
     "limitation": "Lưu ý: trình duyệt không chỉnh được khẩu độ, tốc độ hay ISO của camera điện thoại, và ảnh chụp trong app không có thông số EXIF. App giúp bạn về cách cầm máy, bố cục và ánh sáng. Muốn đủ chất lượng và thông số, hãy dùng camera gốc của máy.",
     "start": "Bật camera",
     "retry": "Thử lại",
@@ -345,16 +348,39 @@
     },
     "aspect": "Đổi tỉ lệ khung",
     "aspectFull": "Toàn khung",
+    "mode": "Đổi chế độ hướng dẫn",
+    "modes": {
+      "portrait": "Chân dung",
+      "landscape": "Phong cảnh",
+      "free": "Tự do"
+    },
     "exposure": "Bù sáng",
     "level": "Thẳng",
     "tilt": "Nghiêng {deg}°",
     "capturedTitle": "Ảnh vừa chụp",
+    "subject": {
+      "loading": "Đang tải bộ nhận diện người…",
+      "error": "Không tải được bộ nhận diện người — vẫn chụp bình thường được",
+      "none": "Chưa thấy khuôn mặt nào trong khung",
+      "good": "Bố cục đẹp — bấm chụp thôi!",
+      "hints": {
+        "head_cut": "Đỉnh đầu đang bị cắt — {move, select, back {lùi ra xa một chút} other {hướng máy lên một chút}}",
+        "cut_joint": "Khung đang cắt ngang {joint, select, knee {đầu gối} ankle {cổ chân} wrist {cổ tay} other {khuỷu tay}} — {move, select, left {xoay máy sang trái một chút} right {xoay máy sang phải một chút} other {lùi lại cho thấy trọn, hoặc hướng máy lên để cắt cao hơn khớp}}",
+        "near_edge": "Người đang sát mép — xoay máy sang {move, select, left {trái} other {phải}}",
+        "eyes_low": "Đưa mắt lên gần đường 1/3 trên — hướng máy xuống một chút",
+        "too_much_headroom": "Trên đầu đang dư nhiều khoảng trống — {move, select, closer {tiến lại gần hơn} other {hướng máy xuống một chút}}",
+        "look_room": "Chừa khoảng trống phía người đang nhìn — xoay máy sang {move, select, left {trái} other {phải}}",
+        "too_small": "Người hơi nhỏ trong khung — tiến lại gần hơn"
+      }
+    },
     "hints": {
       "backlit": "Ngược sáng — xoay để nguồn sáng chiếu từ bên cạnh, hoặc chụp bằng camera gốc có HDR",
       "sky_clipped": "Trời đang cháy sáng — hạ máy để bớt phần trời, hoặc giảm phơi sáng",
       "highlights_clipped": "Có vùng cháy sáng — đừng để chỗ quá sáng chiếm nhiều khung",
       "too_dark": "Hơi tối — tìm thêm ánh sáng và giữ máy thật chắc khi bấm",
-      "too_bright": "Ảnh đang quá sáng — giảm phơi sáng hoặc tránh nắng gắt"
+      "too_bright": "Ảnh đang quá sáng — giảm phơi sáng hoặc tránh nắng gắt",
+      "horizon_center": "Chân trời đang cắt đôi khung — trời đẹp thì hướng máy lên, cảnh dưới đẹp thì hướng máy xuống, cho chân trời nằm trên đường 1/3",
+      "horizon_third": "Chân trời nằm trên đường 1/3 — đẹp"
     },
     "errors": {
       "camera_unsupported": "Trình duyệt này không mở được camera. Hãy dùng nút \"Dùng camera gốc\".",

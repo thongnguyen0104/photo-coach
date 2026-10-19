@@ -6,7 +6,7 @@
 |---|---|
 | Phase 0 | Công cụ + hướng dẫn xong (`docs/PHASE0-SETUP.md`, `tools/setup-check`). Đã có: Neon, Gemini. **Còn thiếu: Google OAuth, Oracle + spike CORS** |
 | Phase 1 | **Code xong + test xong** (57 unit/integration, E2E desktop + mobile với Gemini thật). Còn: deploy Vercel (`docs/PHASE1-DEPLOY.md`) — cần Google OAuth + Oracle trước |
-| Phase 2 | **2A xong** (2026-10-18): trang `/camera` — camera trực tiếp, lưới bố cục, khung tỉ lệ, thước cân bằng, cảnh báo sáng/tối, bù sáng (máy hỗ trợ), chụp → phân tích; PWA manifest + icon. Test E2E bằng camera giả. **Chưa test trên điện thoại thật.** Còn 2B (MediaPipe người/mặt, chế độ thể loại) và 2C (MediaPipe + đo chân trời cho ảnh upload) |
+| Phase 2 | **2A xong** (2026-10-18): trang `/camera` — camera trực tiếp, lưới bố cục, khung tỉ lệ, thước cân bằng, cảnh báo sáng/tối, bù sáng (máy hỗ trợ), chụp → phân tích; PWA manifest + icon. Test E2E bằng camera giả. **2B xong** (2026-10-19): chế độ Chân dung (MediaPipe nhận diện người ngay trên máy → nhắc dịch máy) / Phong cảnh (dò chân trời) / Tự do. **Chưa test trên điện thoại thật.** Còn 2C (MediaPipe + đo chân trời cho ảnh upload) |
 | Phase 3 | **Trình chỉnh sửa ảnh xong** (2026-10-18): xoá vật thể (MI-GAN trên trình duyệt), cắt & xoay, màu & sáng, "Áp dụng gợi ý AI", tải ảnh về. Phần còn lại của Phase 3 chưa làm |
 
 ### Khác so với kế hoạch ban đầu (và lý do)
@@ -215,7 +215,15 @@ Giới hạn cần nói rõ với người dùng: trình duyệt **không điề
 - **Thước cân bằng tính từ véc-tơ trọng lực** (beta/gamma → góc xoay quanh trục nhìn, trừ `screen.orientation.angle`) thay vì đọc thẳng gamma — đúng cả khi cầm dọc lẫn ngang. Không chặn theo kết quả xin quyền (Chrome trả "prompt" mà vẫn gửi dữ liệu); có dữ liệu thì hiện.
 - **Ảnh chụp trong app không có EXIF** → thay fact `no_exif` bằng `live_capture`, gửi kèm góc nghiêng lúc bấm chụp (`raw.capture`) → fact `capture_level` / `capture_tilt` và AI biết không được đoán thông số. `PROMPT_VERSION` = 2026-10-18.1.
 - `ImageCapture.takePhoto()` chỉ dùng khi ảnh cùng hướng và lớn hơn frame video (một số máy Android trả ảnh chưa xoay); ngược lại lấy frame video.
-- **2B — tiếp theo**: MediaPipe FaceDetector + PoseLandmarker (lazy-load), quy tắc vị trí người, chế độ Chân dung / Phong cảnh (bỏ Đồ ăn / Sản phẩm cho tới khi cần).
+- **2B — xong (2026-10-19)**: nút chế độ trên camera: **Chân dung** (mặc định) / **Phong cảnh** / **Tự do**, nhớ lựa chọn trong `localStorage`.
+  - `@mediapipe/tasks-vision` **ghim 1.0.1** (bản 1.1.x mới ra vài ngày). WASM tải từ jsDelivr đúng phiên bản (~3MB nén), model từ `storage.googleapis.com/mediapipe-models` (pose lite ~6MB + face ~0.2MB). Chỉ tải khi vào chế độ Chân dung; test unit kiểm tra hằng `MEDIAPIPE_VERSION` khớp `package.json`.
+  - **PoseLandmarker là chính** (33 điểm: mắt, miệng, vai, khớp tay chân); **FaceDetector chỉ chạy khi pose không thấy ai** (cận mặt quá sát không thấy vai). Ước lượng đỉnh đầu từ khoảng cách mắt–miệng (≈ 0.3 chiều cao đầu) — không cần model tóc/đầu riêng.
+  - Quy tắc (`src/lib/camera/subject.ts`, hàm thuần), toạ độ theo **khung sẽ chụp** (đã tính khung 4:5…): cắt đỉnh đầu → cắt ngang khớp (gối, cổ chân, cổ tay, khuỷu, chỉ tin khi thấy khớp cha) → sát mép → mắt dưới 1/3 (cận/nửa người) hoặc dư trời (toàn thân) → chừa khoảng trống theo hướng nhìn → người quá nhỏ. Chỉ hiện **1 lời nhắc** quan trọng nhất + mũi tên hướng dịch máy; chống nhấp nháy bằng `HintStabilizer` (đã thành generic).
+  - Vẽ: khung quanh người (xanh khi ổn), chấm mắt → vòng đích ở giao điểm 1/3 (nhìn sang phải → đích bên trái), chấm đỏ chỗ khớp bị cắt.
+  - Nhận diện ~10 lần/giây trên frame thu về 512px, tự giãn còn ~4 lần/giây khi 1 lần mất > 60ms, dừng khi tab ẩn. Chạy main thread (MediaPipe dùng GPU qua WebGL), lỗi GPU → CPU.
+  - **Phong cảnh**: dò chân trời bằng **chênh sáng trời/đất theo hàng**, kiểm tra 4 dải dọc phải khớp nhau (`horizon.ts`) — rẻ hơn Hough, chỉ cần độ cao vì góc nghiêng đã có cảm biến. Nhắc khi chân trời cắt đôi khung, khen khi nằm trên đường 1/3.
+  - Bỏ Đồ ăn / Sản phẩm cho tới khi cần. **Chưa gửi chế độ đang dùng sang AI** khi phân tích (có thể thêm vào `raw.capture` sau).
+  - Test: unit cho quy tắc + chân trời; E2E dùng **bộ nhận diện giả** (`window.__PHOTO_COACH_FAKE_PEOPLE__`, chỉ có khi không phải production) + 1 test tải MediaPipe thật trên camera giả.
 - **2C**: MediaPipe cho ảnh upload; đo chân trời bằng Hough **tự viết bằng TypeScript** trên ảnh 800px (thay OpenCV.js ~8MB).
 
 Cũng đưa vào Phase 2:

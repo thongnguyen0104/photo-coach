@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Camera, Grid3x3, ImageUp, Loader2, Ratio, Ruler, SunMedium, X } from "lucide-react";
+import { Camera, Grid3x3, ImageUp, Loader2, Mountain, Ratio, Ruler, ScanFace, SunMedium, User, X } from "lucide-react";
+import { SubjectCoach } from "@/components/camera/SubjectCoach";
 import { Uploader } from "@/components/upload/Uploader";
 import type { CaptureInfo } from "@/lib/image/metadata";
 import { computeImageStats } from "@/lib/image/stats";
@@ -16,8 +17,10 @@ import {
   stopStream,
 } from "@/lib/camera/capture";
 import { exposureHints, FRAME_INTERVAL_MS, FRAME_SAMPLE_EDGE, HintStabilizer, type ExposureHint } from "@/lib/camera/exposure";
-import { aspectRect, ASPECTS, gridLines, GRIDS, type Aspect, type GridKind } from "@/lib/camera/frame";
+import { aspectRect, ASPECTS, COACH_MODES, gridLines, GRIDS, type Aspect, type CoachMode, type GridKind } from "@/lib/camera/frame";
+import { estimateHorizon, horizonHint, type HorizonHint } from "@/lib/camera/horizon";
 import { LEVEL_OK_DEG, levelFromOrientation, smoothAngle, type LevelReading } from "@/lib/camera/level";
+import type { FrameGeometry } from "@/lib/camera/subject";
 
 type Phase =
   | { step: "intro" }
@@ -28,20 +31,27 @@ type Phase =
 
 const PREFS_KEY = "photo-coach:camera";
 
-function loadPrefs(): { grid: GridKind; aspect: Aspect } {
-  const fallback = { grid: "thirds" as GridKind, aspect: "full" as Aspect };
+interface Prefs {
+  grid: GridKind;
+  aspect: Aspect;
+  mode: CoachMode;
+}
+
+function loadPrefs(): Prefs {
+  const fallback: Prefs = { grid: "thirds", aspect: "full", mode: "portrait" };
   try {
     const p = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "{}");
     return {
       grid: GRIDS.includes(p.grid) ? p.grid : fallback.grid,
       aspect: ASPECTS.includes(p.aspect) ? p.aspect : fallback.aspect,
+      mode: COACH_MODES.includes(p.mode) ? p.mode : fallback.mode,
     };
   } catch {
     return fallback;
   }
 }
 
-function savePrefs(prefs: { grid: GridKind; aspect: Aspect }) {
+function savePrefs(prefs: Prefs) {
   try {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
   } catch {
@@ -56,6 +66,7 @@ export function CameraCoach() {
   const [phase, setPhase] = useState<Phase>({ step: "intro" });
   const [grid, setGrid] = useState<GridKind>("thirds");
   const [aspect, setAspect] = useState<Aspect>("full");
+  const [mode, setMode] = useState<CoachMode>("portrait");
   const [flash, setFlash] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -73,6 +84,7 @@ export function CameraCoach() {
     const prefs = loadPrefs();
     setGrid(prefs.grid);
     setAspect(prefs.aspect);
+    setMode(prefs.mode);
     try {
       stopStream(streamRef.current);
       streamRef.current = await openCamera();
@@ -132,12 +144,14 @@ export function CameraCoach() {
     }
   }
 
-  const setPref = (prefs: Partial<{ grid: GridKind; aspect: Aspect }>) => {
-    const merged = { grid, aspect, ...prefs };
+  const setPref = (prefs: Partial<Prefs>) => {
+    const merged = { grid, aspect, mode, ...prefs };
     setGrid(merged.grid);
     setAspect(merged.aspect);
+    setMode(merged.mode);
     savePrefs(merged);
   };
+  const ModeIcon = mode === "portrait" ? User : mode === "landscape" ? Mountain : Camera;
 
   const nativeInput = (
     <input
@@ -186,6 +200,14 @@ export function CameraCoach() {
               <SunMedium className="size-5 shrink-0 text-accent" aria-hidden />
               {t("featureLight")}
             </li>
+            <li className="flex gap-2">
+              <ScanFace className="size-5 shrink-0 text-accent" aria-hidden />
+              {t("featureSubject")}
+            </li>
+            <li className="flex gap-2">
+              <Mountain className="size-5 shrink-0 text-accent" aria-hidden />
+              {t("featureLandscape")}
+            </li>
           </ul>
           <p className="rounded-lg bg-surface-2 p-3 text-xs text-muted">{t("limitation")}</p>
 
@@ -228,10 +250,26 @@ export function CameraCoach() {
           <X className="size-6" aria-hidden />
         </Link>
         <span className="text-sm font-medium text-white/80">{t("title")}</span>
-        <span className="w-10" />
+        <button
+          type="button"
+          className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20"
+          onClick={() => setPref({ mode: next(COACH_MODES, mode) })}
+          aria-label={t("mode")}
+          data-testid="mode-toggle"
+        >
+          <ModeIcon className="mr-1 inline size-4" aria-hidden />
+          {t(`modes.${mode}`)}
+        </button>
       </div>
 
-      <Stage videoRef={videoRef} grid={grid} aspect={aspect} levelRef={levelRef} starting={phase.step === "starting"} />
+      <Stage
+        videoRef={videoRef}
+        grid={grid}
+        aspect={aspect}
+        mode={mode}
+        levelRef={levelRef}
+        starting={phase.step === "starting"}
+      />
 
       <ExposureControl streamRef={streamRef} active={phase.step === "live"} />
 
@@ -277,10 +315,11 @@ function Stage(props: {
   videoRef: RefObject<HTMLVideoElement | null>;
   grid: GridKind;
   aspect: Aspect;
+  mode: CoachMode;
   levelRef: RefObject<LevelReading | null>;
   starting: boolean;
 }) {
-  const { videoRef, grid, aspect, levelRef, starting } = props;
+  const { videoRef, grid, aspect, mode, levelRef, starting } = props;
   const stageRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [dims, setDims] = useState({ w: 0, h: 0 });
@@ -304,7 +343,12 @@ function Stage(props: {
     ? { width: dims.w * scale, height: dims.h * scale, left: (box.w - dims.w * scale) / 2, top: (box.h - dims.h * scale) / 2 }
     : { width: "100%", height: "100%", left: 0, top: 0 };
 
-  const r = dims.w ? aspectRect(dims.w, dims.h, aspect) : null;
+  // Giữ cùng object khi kích thước không đổi → vòng lặp nhận diện không bị khởi động lại
+  const geometry = useMemo<FrameGeometry | null>(
+    () => (dims.w ? { vw: dims.w, vh: dims.h, r: aspectRect(dims.w, dims.h, aspect) } : null),
+    [dims.w, dims.h, aspect],
+  );
+  const r = geometry?.r ?? null;
 
   return (
     <div ref={stageRef} className="relative min-h-0 flex-1 overflow-hidden">
@@ -352,7 +396,8 @@ function Stage(props: {
           </svg>
         )}
         <Level levelRef={levelRef} />
-        <Hints videoRef={videoRef} />
+        <Hints videoRef={videoRef} geometry={mode === "landscape" ? geometry : null} />
+        {mode === "portrait" && geometry && !starting && <SubjectCoach videoRef={videoRef} geometry={geometry} />}
       </div>
       {starting && (
         <div className="absolute inset-0 grid place-items-center">
@@ -424,17 +469,24 @@ function Level({ levelRef }: { levelRef: RefObject<LevelReading | null> }) {
 
 // ================================================================ cảnh báo sáng/tối
 
-function Hints({ videoRef }: { videoRef: RefObject<HTMLVideoElement | null> }) {
+type LiveHint = ExposureHint | HorizonHint;
+
+/** Cảnh báo sáng/tối; ở chế độ Phong cảnh (`geometry` khác null) thêm vị trí đường chân trời. */
+function Hints({ videoRef, geometry }: { videoRef: RefObject<HTMLVideoElement | null>; geometry: FrameGeometry | null }) {
   const t = useTranslations("camera");
-  const [hints, setHints] = useState<ExposureHint[]>([]);
+  const [hints, setHints] = useState<LiveHint[]>([]);
+  /** Đường chân trời theo toạ độ khung sẽ chụp (0..1) */
+  const [horizon, setHorizon] = useState<number | null>(null);
 
   useEffect(() => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
-    const stabilizer = new HintStabilizer();
+    const stabilizer = new HintStabilizer<LiveHint>();
     let timer = 0;
     let last = "";
+    let smooth: number | null = null;
+    let misses = 0;
     const tick = () => {
       timer = window.setTimeout(tick, FRAME_INTERVAL_MS);
       const v = videoRef.current;
@@ -448,8 +500,22 @@ function Hints({ videoRef }: { videoRef: RefObject<HTMLVideoElement | null> }) {
         canvas.height = h;
       }
       ctx.drawImage(v, 0, 0, w, h);
-      const stats = computeImageStats(ctx.getImageData(0, 0, w, h).data, w, h);
-      const shown = stabilizer.push(exposureHints(stats)).slice(0, 2);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const found: LiveHint[] = exposureHints(computeImageStats(data, w, h));
+
+      if (geometry) {
+        const y = estimateHorizon(data, w, h);
+        const fy = y === null ? null : (y * geometry.vh - geometry.r.y) / geometry.r.h;
+        if (fy !== null && fy >= 0 && fy <= 1) {
+          misses = 0;
+          smooth = smooth === null || Math.abs(fy - smooth) > 0.15 ? fy : smooth + (fy - smooth) * 0.3;
+          const hh = horizonHint(smooth);
+          if (hh) found.push(hh);
+        } else if (++misses >= 5) smooth = null; // mất dấu ~1 giây mới ẩn đường
+        setHorizon(smooth === null ? null : Math.round(smooth * 200) / 200);
+      }
+
+      const shown = stabilizer.push(found).slice(0, 2);
       const key = shown.join();
       if (key !== last) {
         last = key;
@@ -457,18 +523,41 @@ function Hints({ videoRef }: { videoRef: RefObject<HTMLVideoElement | null> }) {
       }
     };
     tick();
-    return () => window.clearTimeout(timer);
-  }, [videoRef]);
+    return () => {
+      window.clearTimeout(timer);
+      setHorizon(null);
+      setHints([]);
+    };
+  }, [videoRef, geometry]);
 
-  if (!hints.length) return null;
+  const third = hints.includes("horizon_third");
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-3 flex flex-col items-center gap-2 px-3" aria-live="polite" data-testid="hints">
-      {hints.map((h) => (
-        <p key={h} className="max-w-sm rounded-full bg-black/60 px-3 py-1.5 text-center text-xs font-medium backdrop-blur">
-          {t(`hints.${h}`)}
-        </p>
-      ))}
-    </div>
+    <>
+      {geometry && horizon !== null && (
+        <div
+          className="pointer-events-none absolute border-t-2 border-dashed"
+          style={{
+            left: `${(geometry.r.x / geometry.vw) * 100}%`,
+            width: `${(geometry.r.w / geometry.vw) * 100}%`,
+            top: `${((geometry.r.y + horizon * geometry.r.h) / geometry.vh) * 100}%`,
+            borderColor: third ? "#4ade80" : "rgba(251, 191, 36, 0.8)",
+          }}
+          data-testid="horizon-line"
+        />
+      )}
+      {hints.length > 0 && (
+        <div className="pointer-events-none absolute inset-x-0 top-3 flex flex-col items-center gap-2 px-3" aria-live="polite" data-testid="hints">
+          {hints.map((h) => (
+            <p
+              key={h}
+              className={`max-w-sm rounded-full bg-black/60 px-3 py-1.5 text-center text-xs font-medium backdrop-blur ${h === "horizon_third" ? "text-green-400" : ""}`}
+            >
+              {t(`hints.${h}`)}
+            </p>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
