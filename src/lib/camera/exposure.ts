@@ -33,18 +33,18 @@ export function exposureHints(s: Input): ExposureHint[] {
 /**
  * Chống nhấp nháy: một cảnh báo chỉ hiện khi xuất hiện ở ít nhất `need` trong `window` frame gần nhất.
  */
-export class HintStabilizer {
-  private history: ExposureHint[][] = [];
+export class HintStabilizer<T extends string = ExposureHint> {
+  private history: T[][] = [];
 
   constructor(
     private readonly window = 5,
     private readonly need = 3,
   ) {}
 
-  push(hints: ExposureHint[]): ExposureHint[] {
+  push(hints: T[]): T[] {
     this.history.push(hints);
     if (this.history.length > this.window) this.history.shift();
-    const count = new Map<ExposureHint, number>();
+    const count = new Map<T, number>();
     for (const frame of this.history) for (const h of frame) count.set(h, (count.get(h) ?? 0) + 1);
     // Giữ thứ tự ưu tiên của frame mới nhất, rồi tới các cảnh báo cũ còn đủ số lần
     const order = [...new Set([...hints, ...this.history.flat()])];

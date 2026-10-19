@@ -234,6 +234,7 @@
       "Your photos are stored privately. Only you can view them, through short-lived links.",
       "By default, GPS location is removed from the photo on your device, before it is uploaded. You can choose to keep it when uploading.",
       "To analyze, a downscaled copy (max 1536px) is sent to Google Gemini. On the free tier, Google may use this data to improve its products.",
+      "When you shoot with the in-app camera, people detection, light metering and horizon finding run on your device. Nothing from the camera is sent anywhere until you tap Analyse.",
       "You can delete a photo at any time from History. Deleting removes the file and all analyses permanently.",
       "We only use your Google account's email, name and avatar to sign you in."
     ]
@@ -324,10 +325,12 @@
   },
   "camera": {
     "title": "Live coaching",
-    "intro": "Open the camera right in the app. While you frame, it shows composition grids, a level and warns you when the shot is too bright or too dark. After you shoot, the photo goes straight to analysis.",
+    "intro": "Open the camera right in the app. While you frame, it spots people and tells you which way to move the phone for a better composition, shows composition grids and a level, and warns you when the shot is too bright or too dark. After you shoot, the photo goes straight to analysis.",
     "featureGrid": "Composition grids: thirds, golden ratio, diagonals, centre. Frames for 4:5, 1:1, 9:16, 3:2.",
     "featureLevel": "Level: turns green when the camera is straight (under 1°).",
     "featureLight": "Warns about backlight, blown-out sky or low light.",
+    "featureSubject": "Portrait mode: spots people and reminds you about headroom, eyes on the upper third, not cutting at joints and leaving room where they look. Runs on your device; nothing is uploaded (about 9MB to download the first time).",
+    "featureLandscape": "Landscape mode: finds the horizon and warns when it splits the frame in half.",
     "limitation": "Note: browsers can't control your phone camera's aperture, shutter or ISO, and photos taken in the app have no EXIF settings. The app coaches how you hold, frame and light the shot. For full quality and settings, use your phone's own camera.",
     "start": "Turn on camera",
     "retry": "Try again",
@@ -345,16 +348,39 @@
     },
     "aspect": "Change frame ratio",
     "aspectFull": "Full",
+    "mode": "Change coaching mode",
+    "modes": {
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "free": "Free"
+    },
     "exposure": "Exposure",
     "level": "Level",
     "tilt": "Tilted {deg}°",
     "capturedTitle": "Your photo",
+    "subject": {
+      "loading": "Loading people detection…",
+      "error": "Couldn't load people detection — you can still shoot normally",
+      "none": "No face in the frame yet",
+      "good": "Nice composition — take the shot!",
+      "hints": {
+        "head_cut": "The top of the head is cut off — {move, select, back {step back a little} other {tilt the phone up a little}}",
+        "cut_joint": "The frame cuts at the {joint, select, knee {knees} ankle {ankles} wrist {wrists} other {elbows}} — {move, select, left {turn the phone left a little} right {turn the phone right a little} other {step back to show it all, or tilt up to crop above the joint}}",
+        "near_edge": "They're right at the edge — turn the phone {move, select, left {left} other {right}}",
+        "eyes_low": "Bring the eyes up to the upper third line — tilt the phone down a little",
+        "too_much_headroom": "Too much space above the head — {move, select, closer {move closer} other {tilt the phone down a little}}",
+        "look_room": "Leave room on the side they're looking — turn the phone {move, select, left {left} other {right}}",
+        "too_small": "They're quite small in the frame — move closer"
+      }
+    },
     "hints": {
       "backlit": "Backlit — turn so the light comes from the side, or use your phone camera with HDR",
       "sky_clipped": "Sky is blown out — tilt down to show less sky, or lower exposure",
       "highlights_clipped": "Blown-out areas — keep very bright spots out of most of the frame",
       "too_dark": "A bit dark — find more light and hold the phone very still",
-      "too_bright": "Too bright — lower exposure or avoid harsh sun"
+      "too_bright": "Too bright — lower exposure or avoid harsh sun",
+      "horizon_center": "The horizon cuts the frame in half — tilt up if the sky is the star, down if the land is, so it sits on a third line",
+      "horizon_third": "Horizon on a third line — nice"
     },
     "errors": {
       "camera_unsupported": "This browser can't open the camera. Use \"Use phone camera\" instead.",

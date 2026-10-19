@@ -57,3 +57,7 @@ export function gridLines(kind: GridKind): { x1: number; y1: number; x2: number;
       return [];
   }
 }
+
+/** Chế độ hướng dẫn: Chân dung (nhận diện người), Phong cảnh (đường chân trời), Tự do (chỉ lưới/cân bằng/ánh sáng). */
+export const COACH_MODES = ["portrait", "landscape", "free"] as const;
+export type CoachMode = (typeof COACH_MODES)[number];
